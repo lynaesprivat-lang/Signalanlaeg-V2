@@ -2177,8 +2177,6 @@
   function init() {
     tilkoblEvents();
     opdaterFormFelter();
-    opdaterGemtListe();
-    render();
 
     // Log ud knap
     const logoutBtn = document.getElementById('logout-btn');
@@ -2187,12 +2185,20 @@
       window.location.href = 'login.html';
     });
 
-    // Login check → indlæs katalog → hent anlæg
+    // Vis loading
+    const main = document.querySelector('.app-main');
+    if (main) main.style.opacity = '0.3';
+
+    // Login check → indlæs katalog → render → hent anlæg
     tjekLogin().then(async loggetInd => {
       if (!loggetInd) return;
       await indlaesKatalogFraSupabase(sb);
-      // Opdater dropdowns efter katalog er indlæst
+      // Opdater mastetype dropdown i HTML
       opdaterMasteDropdowns();
+      // Nu er katalog klar — render og hent anlæg
+      if (main) main.style.opacity = '1';
+      opdaterGemtListe();
+      render();
       await supabaseHentAlle();
     });
   }
