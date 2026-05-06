@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Signalanlæg" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Signalanlæg – Kategoriseringsværktøj</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+      <h1>Signalanlæg</h1>
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <button title="Opdater app" onclick="window.location.href=window.location.href.split('?')[0]+'?v='+Date.now()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:8px;color:white;font-size:20px;cursor:pointer;padding:6px 12px;line-height:1;min-height:36px">↺</button>
+        <span id="bruger-navn" style="font-size:12px;color:rgba(255,255,255,0.7)"></span>
+        <button id="logout-btn" title="Log ud" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:white;font-size:12px;cursor:pointer;padding:6px 10px;min-height:36px">Log ud</button>
+        <span class="app-credit">NIL/KLO</span>
+      </div>
+    </div>
+    <p class="subtitle">Kategoriseringsværktøj for master og signaler</p>
+  </header>
+
+  <main class="app-main">
+
+    <!-- Anlægs-felter -->
+    <section class="card">
+      <h2>Anlæg</h2>
+      <div class="grid">
+        <div class="field">
+          <label for="anlaeg-nr">Anlægsnummer</label>
+          <input type="text" id="anlaeg-nr" placeholder="fx 1901-295" />
+        </div>
+<div class="field field-wide">
+          <label for="anlaeg-navn">Anlæggets navn</label>
+          <input type="text" id="anlaeg-navn" placeholder="fx Hovedgade/Sidegade" />
+        </div>
+
+      </div>
+      <div class="button-row">
+        <button id="nyt-anlaeg-btn" class="btn-secondary">Nyt anlæg</button>
+      </div>
+    </section>
+
+    <!-- Gem/indlæs -->
+    <section class="card">
+      <h2>Gemte anlæg</h2>
+      <div class="field" style="margin-bottom:0.6rem">
+        <select id="gemte-anlaeg" style="width:100%">
+          <option value="">— Vælg gemt anlæg —</option>
+        </select>
+      </div>
+      <div class="button-row">
+        <button id="indlaes-btn" class="btn-secondary btn-gem-row">Indlæs</button>
+        <button id="omdoeb-btn" class="btn-secondary btn-gem-row">Omdøb</button>
+        <button id="slet-btn" class="btn-danger btn-gem-row">Slet</button>
+        <button id="gem-btn" class="btn-primary btn-gem-row">Gem</button>
+      </div>
+      <div id="omdoeb-container" style="display:none;margin-top:0.5rem">
+        <div class="button-row">
+          <input type="text" id="omdoeb-input" placeholder="Nyt anlægsnummer" style="flex:1" />
+          <button class="btn-primary btn-gem-row" onclick="bekraeftOmdoeb()">Gem navn</button>
+          <button class="btn-secondary btn-gem-row" onclick="document.getElementById('omdoeb-container').style.display='none'">Annullér</button>
+        </div>
+      </div>
+      <div class="button-row" style="margin-top:0.5rem">
+        <button id="export-json-enkelt-btn" class="btn-secondary btn-gem-row">Eksportér dette</button>
+        <button id="export-json-btn" class="btn-secondary btn-gem-row">Eksportér alle</button>
+        <label for="import-json-input" class="btn-secondary btn-label btn-gem-row">Importér</label>
+        <input type="file" id="import-json-input" accept="application/json" hidden />
+      </div>
+    </section>
+
+
+    <!-- Tilføj mast -->
+    <section class="card">
+      <h2>Tilføj mast</h2>
+      <div class="grid">
+        <div class="field">
+          <label for="ny-mast-id">Mast-ID</label>
+          <input type="text" id="ny-mast-id" placeholder="fx S1" />
+        </div>
+        <div class="field field-wide">
+          <label for="ny-mastetype">Mastetype</label>
+          <select id="ny-mastetype">
+            <optgroup label="Master til nedgravning">
+              <option value="Høj mast 5,1m ø127">Høj mast 5,1m ø127</option>
+              <option value="Lav mast 3,1m ø127">Lav mast 3,1m ø127</option>
+              <option value="Mast 2,0m til Cykelsignal ø127">Mast 2,0m til Cykelsignal ø127</option>
+              <option value="Tryk mast m. Luge">Tryk mast m. Luge</option>
+              <option value="Mast 6,1m Ø127 til Radar">Mast 6,1m Ø127 til Radar</option>
+            </optgroup>
+            <optgroup label="Alu-round master">
+              <option value="Alu-round 1,4m Ø135">Alu-round 1,4m Ø135</option>
+              <option value="Alu-round 2,1m Ø135 til Cykelsignal">Alu-round 2,1m Ø135 til Cykelsignal</option>
+              <option value="Alu-round 3,1m Ø135">Alu-round 3,1m Ø135</option>
+              <option value="Alu-round 5,3m Ø165">Alu-round 5,3m Ø165</option>
+              <option value="Alu-round 6,3m ø165 til Radar">Alu-round 6,3m ø165 til Radar</option>
+            </optgroup>
+            <optgroup label="DSI master">
+              <option value="Lav DSI mast">Lav DSI mast</option>
+              <option value="Høj DSI mast">Høj DSI mast</option>
+              <option value="DSI Galgemast cykel">DSI Galgemast cykel</option>
+              <option value="DSI Galgemast høj">DSI Galgemast høj</option>
+              <option value="DSI Video mast 10m">DSI Video mast 10m</option>
+              <option value="DSI Kombimast">DSI Kombimast</option>
+            </optgroup>
+            <optgroup label="Milewide master">
+              <option value="Milewide Lav">Milewide Lav</option>
+              <option value="Milewide Høj">Milewide Høj</option>
+              <option value="Milewide Cykel Galge">Milewide Cykel Galge</option>
+              <option value="Milewide Høj Galge">Milewide Høj Galge</option>
+              <option value="Milewide Tryk Stander">Milewide Tryk Stander</option>
+              <option value="Milewide Kombi 10m med Fodflange">Milewide Kombi 10m med Fodflange</option>
+            </optgroup>
+            <optgroup label="Danintra master">
+              <option value="Danintra Mast 1.4m til Fodg. Tryk">Danintra Mast 1.4m til Fodg. Tryk</option>
+              <option value="Danintra Mast 2.0m til Cykelsignal">Danintra Mast 2.0m til Cykelsignal</option>
+              <option value="Danintra Mast Lav 3.1m">Danintra Mast Lav 3.1m</option>
+              <option value="Danintra Mast Høj 5.2m">Danintra Mast Høj 5.2m</option>
+              <option value="Danintra Kombimast 10m">Danintra Kombimast 10m</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+      <div class="button-row">
+        <button id="tilfoej-mast-btn" class="btn-primary">+ Tilføj mast</button>
+      </div>
+    </section>
+
+    <!-- Mast-liste -->
+    <section id="master-liste"></section>
+
+    <!-- Output -->
+    <section class="card">
+      <div class="card-header">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <button class="btn-collapse" id="toggle-output-btn">▸</button>
+          <h2 style="margin:0">Output</h2>
+        </div>
+        <div class="button-row" id="output-controls" style="display:none">
+          <div class="output-row-1">
+            <select id="format-vaelger">
+              <option value="md">Markdown (.md)</option>
+              <option value="txt">Tekst (.txt)</option>
+            </select>
+            <button id="kopier-btn" class="btn-secondary">Kopiér</button>
+            <button id="download-btn" class="btn-primary">Download</button>
+          </div>
+          <div class="output-row-2">
+            <select id="stykliste-format">
+              <option value="md">Stykliste .md</option>
+              <option value="txt">Stykliste .txt</option>
+            </select>
+            <button id="download-stykliste-btn" class="btn-secondary">Download stykliste</button>
+          </div>
+        </div>
+      </div>
+      <div id="output-indhold" style="display:none">
+        <div id="mast-filter-wrap" class="mast-filter-wrap" style="display:none">
+          <div class="mast-filter-header">
+            <span class="mast-filter-label">Inkluder master:</span>
+            <button type="button" id="filter-alle-btn" class="btn-small">Alle</button>
+            <button type="button" id="filter-ingen-btn" class="btn-small">Ingen</button>
+          </div>
+          <div id="mast-filter-checkboxes" class="mast-filter-checkboxes"></div>
+        </div>
+        <textarea id="output" readonly></textarea>
+        <p id="status-besked"></p>
+      </div>
+    </section>
+
+
+    <!-- GitHub Sync -->
+    <section class="card" id="github-sync-card">
+      <div class="card-header" style="margin-bottom:0.5rem">
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <button class="btn-collapse" id="toggle-github-btn">▸</button>
+          <h2 style="margin:0">☁ GitHub Sync</h2>
+        </div>
+        <span id="github-status-badge" class="badge badge-neutral" style="font-size:11px"></span>
+      </div>
+      <div id="github-indhold" style="display:none">
+        <div class="grid" style="margin-bottom:0.6rem">
+          <div class="field field-wide">
+            <label for="github-token">Personal Access Token</label>
+            <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="github-owner">GitHub bruger/org</label>
+            <input type="text" id="github-owner" placeholder="fx lynaesprivat-lang" />
+          </div>
+          <div class="field">
+            <label for="github-repo">Repository navn</label>
+            <input type="text" id="github-repo" placeholder="fx Signaanl-g-App" />
+          </div>
+        </div>
+        <div class="button-row">
+          <button id="github-gem-indst-btn" class="btn-secondary btn-gem-row">Gem indstillinger</button>
+          <button id="github-hent-btn" class="btn-secondary btn-gem-row">Hent fra GitHub</button>
+          <button id="github-push-btn" class="btn-primary btn-gem-row">Push til GitHub</button>
+        </div>
+        <p id="github-besked" style="font-size:12px;margin:0.5rem 0 0;min-height:18px;color:var(--text-muted)"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

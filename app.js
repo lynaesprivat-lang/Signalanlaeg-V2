@@ -1,0 +1,2768 @@
+// Signalanlæg - Kategoriseringsværktøj
+// App-logik
+
+(function () {
+  'use strict';
+
+  // ==============================
+  // Konstanter
+  // ==============================
+  const SIGNAL_KATEGORIER = [
+    {
+      kategori: 'Ercolight / Silux 2 punkt',
+      typer: [
+        { label: 'Lanterne 3-felt 5W',            varenr: '167-250-0831' },
+        { label: 'Lanterne 3-felt 17W',           varenr: '167-250-0531' },
+        { label: 'Lanterne 3-felt 24V',           varenr: '167-250-0931' },
+        { label: 'Lanterne 2-felt fodgænger 5W',  varenr: '167-250-0821' },
+        { label: 'Lanterne 2-felt fodgænger 17W', varenr: '167-250-0521' },
+        { label: 'Lanterne 2-felt fodgænger 24V', varenr: '167-250-0921' },
+        { label: 'Lanterne 1-felt 5W',            varenr: '167-250-0813' },
+        { label: 'Lanterne 1-felt 17W',           varenr: '167-250-0513' },
+        { label: 'Lanterne 1-felt 24V',           varenr: '167-250-0913' },
+      ]
+    },
+    {
+      kategori: 'Ercolight / Silux DSI',
+      typer: [
+        { label: 'Lanterne 3-felt DSI 5W',            varenr: '167-250-0833' },
+        { label: 'Lanterne 3-felt DSI 17W',           varenr: '167-250-0533' },
+        { label: 'Lanterne 2-felt fodgænger DSI 5W',  varenr: '167-250-0823' },
+        { label: 'Lanterne 2-felt fodgænger DSI 17W', varenr: '167-250-0523' },
+        { label: 'Lanterne 1-felt DSI 5W',            varenr: '167-250-0815' },
+        { label: 'Lanterne 1-felt DSI 17W',           varenr: '167-250-0515' },
+      ]
+    },
+    {
+      kategori: 'Swarco AluStar DSI',
+      typer: [
+        { label: 'AluStar DSI 4-lys',              varenr: 'INTERN-SIG-ALUDSI-4' },
+        { label: 'AluStar DSI 3-felt',             varenr: 'INTERN-SIG-ALUDSI-3' },
+        { label: 'AluStar DSI 2-felt fodgænger',   varenr: 'INTERN-SIG-ALUDSI-2' },
+        { label: 'AluStar DSI 1-felt',             varenr: 'INTERN-SIG-ALUDSI-1' },
+      ]
+    },
+    {
+      kategori: 'Swarco AluStar 2 punkt',
+      typer: [
+        { label: 'AluStar 2 punkt 3-felt',             varenr: 'INTERN-SIG-ALU2-3' },
+        { label: 'AluStar 2 punkt 2-felt fodgænger',   varenr: 'INTERN-SIG-ALU2-2' },
+        { label: 'AluStar 2 punkt 1-felt',             varenr: 'INTERN-SIG-ALU2-1' },
+      ]
+    },
+    {
+      kategori: 'Opeka 2 punkt',
+      typer: [
+        { label: 'Opeka 2 punkt 4-felt',           varenr: 'INTERN-SIG-OP2-4' },
+        { label: 'Opeka 2 punkt 3-felt',           varenr: 'INTERN-SIG-OP2-3' },
+        { label: 'Opeka 2 punkt 2-felt',           varenr: 'INTERN-SIG-OP2-2' },
+        { label: 'Opeka 2 punkt 1-felt',           varenr: 'INTERN-SIG-OP2-1' },
+      ]
+    },
+    {
+      kategori: 'Opeka DSI',
+      typer: [
+        { label: 'Opeka DSI 4-felt',               varenr: 'INTERN-SIG-DSI-4' },
+        { label: 'Opeka DSI 3-felt',               varenr: 'INTERN-SIG-DSI-3' },
+        { label: 'Opeka DSI 2-felt',               varenr: 'INTERN-SIG-DSI-2' },
+        { label: 'Opeka DSI 1-felt',               varenr: 'INTERN-SIG-DSI-1' },
+      ]
+    },
+    {
+      kategori: 'Atki DSI',
+      typer: [
+        { label: 'Atki DSI 4-felt',                varenr: 'INTERN-SIG-ATKIDSI-4' },
+        { label: 'Atki DSI 3-felt',                varenr: 'INTERN-SIG-ATKIDSI-3' },
+        { label: 'Atki DSI 2-felt',                varenr: 'INTERN-SIG-ATKIDSI-2' },
+        { label: 'Atki DSI 1-felt',                varenr: 'INTERN-SIG-ATKIDSI-1' },
+      ]
+    },
+    {
+      kategori: 'Atki 2 punkt',
+      typer: [
+        { label: 'Atki 2 punkt 4-felt',            varenr: 'INTERN-SIG-ATKI2-4' },
+        { label: 'Atki 2 punkt 3-felt',            varenr: 'INTERN-SIG-ATKI2-3' },
+        { label: 'Atki 2 punkt 2-felt',            varenr: 'INTERN-SIG-ATKI2-2' },
+        { label: 'Atki 2 punkt 1-felt',            varenr: 'INTERN-SIG-ATKI2-1' },
+      ]
+    },
+    {
+      kategori: 'Glødepære 2 punkt',
+      typer: [
+        { label: 'Glødepære 2 punkt 4-felt',       varenr: 'INTERN-SIG-GL2-4' },
+        { label: 'Glødepære 2 punkt 3-felt',       varenr: 'INTERN-SIG-GL2-3' },
+        { label: 'Glødepære 2 punkt 2-felt',       varenr: 'INTERN-SIG-GL2-2' },
+        { label: 'Glødepære 2 punkt 1-felt',       varenr: 'INTERN-SIG-GL2-1' },
+      ]
+    },
+    {
+      kategori: 'Glødepære DSI',
+      typer: [
+        { label: 'Glødepære DSI 4-felt',           varenr: 'INTERN-SIG-GLDSI-4' },
+        { label: 'Glødepære DSI 3-felt',           varenr: 'INTERN-SIG-GLDSI-3' },
+        { label: 'Glødepære DSI 2-felt',           varenr: 'INTERN-SIG-GLDSI-2' },
+        { label: 'Glødepære DSI 1-felt',           varenr: 'INTERN-SIG-GLDSI-1' },
+      ]
+    },
+    {
+      kategori: 'Sunburst DSI',
+      typer: [
+        { label: 'Sunburst DSI 4-lys',  varenr: 'INTERN-SIG-SUNBURST-4' },
+        { label: 'Sunburst DSI 3-lys',  varenr: 'INTERN-SIG-SUNBURST-3' },
+        { label: 'Sunburst DSI 2-lys',  varenr: 'INTERN-SIG-SUNBURST-2' },
+        { label: 'Sunburst DSI 1-lys',  varenr: 'INTERN-SIG-SUNBURST-1' },
+      ]
+    },
+    {
+      kategori: 'Cykelsignaler',
+      typer: [
+        { label: 'Lanterne 4-felt SEA',              varenr: '167-250-0914' },
+        { label: 'Lanterne 4-felt polsk pissignal',  varenr: '167-250-0501' },
+        { label: 'Lanterne 4-felt Cyklist 100mm LED Sort', varenr: '167-650-0303' },
+      ]
+    },
+  ];
+
+  // Flad liste – kun labels til output (ingen varenr)
+  const SIGNAL_TYPER = SIGNAL_KATEGORIER.flatMap(k => k.typer.map(t => t.label));
+
+  const HOJDE_MULIGHEDER = ['', 'Højt', 'Lavt'];
+
+  // Varenumre der måles i meter
+  const KABEL_VARENUMRE = ['250-100-0362', '250-100-0363', '250-100-0365', '250-100-1997'];
+
+  // Radar/kamera varenumre der bruger spændbånd
+  const RADAR_VARENUMRE = [
+    '250-650-0160', '250-650-0161', '250-650-0164', '250-650-0165', '250-650-0167', // Smartmicro
+    '250-650-0118', '250-650-0119', // Flir
+    '167-665-0063', '167-665-0065', // Heimdall radar
+    '250-650-0190/1', // Radartilslutningsbox Bluetooth
+  ];
+
+  // Spændbånd pr. mastetype (direkte montering)
+  const SPAENDBAAND_PR_MAST = {
+    'Høj mast 5,1m ø127':        '280-850-0009', // 130-150mm
+    'Lav mast 3,1m ø127':        '280-850-0009',
+    'Mast 2,0m til Cykelsignal ø127': '280-850-0009',
+    'Tryk mast m. Luge':         '280-850-0009',
+    'Mast 6,1m Ø127 til Radar':  '280-850-0009',
+    'Lav DSI mast':              '280-850-0009',
+    'Høj DSI mast':              '280-850-0009',
+    'DSI Galgemast cykel':       '280-850-0009',
+    'DSI Galgemast høj':         '280-850-0009',
+    'DSI Video mast 10m':        '280-850-0009',
+    'DSI Kombimast':             '280-850-0009',
+    'Alu-round 1,4m Ø135':           '280-850-0010', // 140-160mm
+    'Alu-round 2,1m Ø135 til Cykelsignal': '280-850-0010',
+    'Alu-round 3,1m Ø135':           '280-850-0010', // 140-160mm
+    'Alu-round 5,3m Ø165':           '280-350-0013', // 170-190mm
+    'Alu-round 6,3m ø165 til Radar': '280-350-0013',
+    'Milewide Lav':              '280-850-0010', // 140-160mm
+    'Milewide Høj':              '280-850-0010',
+    'Milewide Cykel Galge':      '280-850-0010',
+    'Milewide Høj Galge':        '280-850-0010',
+    'Milewide Tryk Stander':     '280-850-0010',
+    'Milewide Kombi 10m med Fodflange': '280-850-0010',
+    'Danintra Mast 1.4m til Fodg. Tryk': '280-850-0011', // 150-170mm
+    'Danintra Mast 2.0m til Cykelsignal': '280-850-0011',
+    'Danintra Mast Lav 3.1m':    '280-850-0011',
+    'Danintra Mast Høj 5.2m':    '280-850-0011',
+    'Danintra Kombimast 10m':    '280-850-0011',
+  };
+
+  // Spændbånd ved forlænger arm
+  const SPAENDBAAND_ARM_DEFAULT = '280-850-0005'; // 90-110mm
+  const SPAENDBAAND_ARM_FLIR    = '280-850-0016'; // 50-70mm
+  const FLIR_VARENUMRE = ['250-650-0118', '250-650-0119'];
+
+  // ==============================
+  // Varekatalog
+  // ==============================
+  const VAREKATALOG = [
+    {
+      kategori: 'Master til nedgravning',
+      varer: [
+        { varenr: '270-200-0105', beskrivelse: 'Høj mast for nedgravning 5,1m ø127', bem: '2 punkt montage' },
+        { varenr: '270-200-0104', beskrivelse: 'Lav mast for nedgravning 3,1m ø127', bem: '2 punkt montage' },
+        { varenr: '270-200-0106', beskrivelse: 'Mast 2,0m til Cykelsignal ø127', bem: '' },
+        { varenr: '270-200-0103', beskrivelse: 'Tryk mast for nedgravning m. Luge', bem: '' },
+        { varenr: '270-200-0109', beskrivelse: 'Mast 6,1m Ø127 til Radar for nedg.', bem: '' },
+        { varenr: '270-200-0141', beskrivelse: 'Lav DSI mast', bem: '' },
+        { varenr: '270-200-0142', beskrivelse: 'Høj DSI mast', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Alu-round master',
+      varer: [
+        { varenr: '270-200-0301', beskrivelse: 'Mast Alu-round 1,4m Ø135', bem: '' },
+        { varenr: '270-200-0305', beskrivelse: 'Mast Alu-round 2,1m Ø135 til Cykelsignal', bem: '' },
+        { varenr: '270-200-0302', beskrivelse: 'Mast Alu-round 3,1m Ø135', bem: '' },
+        { varenr: '270-200-0303', beskrivelse: 'Mast Alu-round 5,3m Ø165', bem: '' },
+        { varenr: '270-200-0308', beskrivelse: 'Mast Alu-round 6,3m ø165 til Radar', bem: '' },
+      ]
+    },
+    {
+      kategori: 'DSI Galgemaster',
+      varer: [
+        { varenr: '270-200-0144', beskrivelse: 'DSI Galgemast cykel', bem: '' },
+        { varenr: '270-200-0146', beskrivelse: 'DSI Galgemast høj', bem: '' },
+        { varenr: 'INTERN-MAST-DSIVIDEO', beskrivelse: 'DSI Video mast 10m', bem: '' },
+        { varenr: 'INTERN-MAST-DSIKOMBI', beskrivelse: 'DSI Kombimast', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Milewide master',
+      varer: [
+        { varenr: '270-200-0409', beskrivelse: 'Milewide Lav', bem: '' },
+        { varenr: '270-200-0404', beskrivelse: 'Milewide Høj', bem: '' },
+        { varenr: '270-200-0405', beskrivelse: 'Milewide Cykel Galge', bem: '' },
+        { varenr: '270-200-0420', beskrivelse: 'Milewide Høj Galge', bem: '' },
+        { varenr: '270-200-0402', beskrivelse: 'Milewide Tryk Stander', bem: '' },
+        { varenr: '270-200-0411', beskrivelse: 'Milewide Kombi 10m med Fodflange', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Danintra master',
+      varer: [
+        { varenr: '270-200-0201', beskrivelse: 'Danintra Mast 1.4m til Fodg. Tryk', bem: '' },
+        { varenr: '270-200-0202', beskrivelse: 'Danintra Mast 2.0m til Cykelsignal', bem: '' },
+        { varenr: '270-200-0203', beskrivelse: 'Danintra Mast Lav 3.1m', bem: '' },
+        { varenr: '270-200-0204', beskrivelse: 'Danintra Mast Høj 5.2m', bem: '' },
+        { varenr: '270-200-0221', beskrivelse: 'Danintra Kombimast 10m', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Fundamentplader',
+      varer: [
+        { varenr: '270-200-0520', beskrivelse: 'Fu. Plade beton ø 102-130mm', bem: '2 stk. for høj. 1 stk. for lav og tryk mast' },
+        { varenr: '270-200-0521', beskrivelse: 'FU. Plade beton rørmast Ø120-165mm', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Mastetilbehør',
+      varer: [
+        { varenr: '250-300-1101', beskrivelse: 'Mastenr. gul folie 0-9', bem: '' },
+        { varenr: '270-100-8268', beskrivelse: 'Flangemøtrik', bem: '' },
+        { varenr: '270-100-1056', beskrivelse: 'Pindbolt', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Signalhoveder – Lanterner 5W',
+      varer: [
+        { varenr: '167-250-0501', beskrivelse: 'Lanterne 4-felt 100mm ALU', bem: 'Inkl. ALU støtteholder. Klar linser' },
+        { varenr: '167-250-0831', beskrivelse: 'Lanterne 4-felt 100mm', bem: 'Inkl. Pc støtteholder. Klar linser' },
+        { varenr: '167-250-0813', beskrivelse: 'Lanterne 3-felt', bem: 'Klar linse. Inkl. skygge' },
+        { varenr: '167-250-0821', beskrivelse: 'Lanterne 2-felt fodgænger', bem: 'Klar linse. Inkl. skygge' },
+        { varenr: '167-250-0811', beskrivelse: 'Lanterne 1-felt', bem: 'Klar linse. Inkl. skygge' },
+        { varenr: '167-650-0303', beskrivelse: 'Lanterne 4-felt Cyklist 100mm LED Sort', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Signalhoveder – Lanterner 17W',
+      varer: [
+        { varenr: '167-650-0914', beskrivelse: 'Lanterne 4-felt 100mm ALU', bem: 'Inkl. ALU støtteholder. Klar linser' },
+        { varenr: '167-250-0303', beskrivelse: 'Lanterne 4-felt 100mm', bem: 'Inkl. Pc støtteholder. Klar linser' },
+        { varenr: '167-250-0531', beskrivelse: 'Lanterne 3-felt', bem: 'Klar linse. Inkl. skygge' },
+        { varenr: '167-250-0521', beskrivelse: 'Lanterne 2-felt fodgænger', bem: 'Klar linse. Inkl. skygge' },
+        { varenr: '167-250-0513', beskrivelse: 'Lanterne 1-felt', bem: 'Klar linse. Inkl. skygge' },
+      ]
+    },
+    {
+      kategori: 'Signalhoveder – Lanterner 24V (Siemens Sx)',
+      varer: [
+        { varenr: '167-250-0931', beskrivelse: 'Lanterne 3-lys 24V', bem: '' },
+        { varenr: '167-250-0921', beskrivelse: 'Lanterne 2-lys 24V', bem: '' },
+        { varenr: '167-250-0913', beskrivelse: 'Lanterne 1-lys 24V', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Signalhoveder – Lanterner 17W DSI',
+      varer: [
+        { varenr: '167-650-0914', beskrivelse: 'Lanterne 4-felt 100mm ALU DSI op', bem: '' },
+        { varenr: '167-650-0306', beskrivelse: 'Lanterne 4-felt 100mm DSI op', bem: '' },
+        { varenr: '167-250-0533', beskrivelse: 'Lanterne 3-felt DSI op', bem: 'Klar linse. Inkl. skygge' },
+        { varenr: '167-250-0523', beskrivelse: 'Lanterne 2-felt fodgænger DSI op', bem: 'Klar linse. Inkl. skygge' },
+        { varenr: '167-250-0515', beskrivelse: 'Lanterne 1-felt DSI op', bem: 'Klar linse. Inkl. skygge' },
+      ]
+    },
+    {
+      kategori: 'Silux2 LED moduler 200mm',
+      varer: [
+        { varenr: '167-650-0152', beskrivelse: '200mm rød led Silux2 inkl. Forramme', bem: 'Hvid linse (5W)' },
+        { varenr: '167-650-0153', beskrivelse: '200mm gul led Silux2 inkl. Forramme', bem: 'Hvid linse (5W)' },
+        { varenr: '167-650-0675', beskrivelse: '200mm grøn led Silux2 inkl. Forramme', bem: 'Hvid linse (5W)' },
+        { varenr: '167-650-0121', beskrivelse: '200mm rød led Silux2 inkl. Forramme', bem: 'Hvid linse (17W)' },
+        { varenr: '167-650-0122', beskrivelse: '200mm gul led Silux2 inkl. Forramme', bem: 'Hvid linse (17W)' },
+        { varenr: '167-650-0123', beskrivelse: '200mm grøn led Silux2 inkl. Forramme', bem: 'Hvid linse (17W)' },
+        { varenr: '167-650-0151', beskrivelse: 'Baggrundsplade Siemens 3-felt', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Masker og indlæg 200mm',
+      varer: [
+        { varenr: '167-650-0673', beskrivelse: 'Pil maske rød/gul Silux2', bem: '' },
+        { varenr: '167-650-0674', beskrivelse: '200mm pilemaske / indlæg Grøn Silux2', bem: '' },
+        { varenr: '167-650-0671', beskrivelse: '200mm Fodg. maske / indlæg rød Silux2', bem: '' },
+        { varenr: '167-650-0672', beskrivelse: '200mm Fodg. maske / indlæg Grøn Silux2', bem: '' },
+      ]
+    },
+
+    {
+      kategori: 'Fodgænger Tryk',
+      underkategorier: [
+        {
+          navn: 'Prisma',
+          varer: [
+            { varenr: '250-650-0034',   beskrivelse: 'Akustisk signal uden tryk 24VDC Prisma', bem: '' },
+            { varenr: '250-650-0035',   beskrivelse: 'Akustisk Fodg.tryk Prisma 24VDC', bem: '' },
+            { varenr: '250-650-0037',   beskrivelse: 'Ekstern Højtaler Prisma', bem: '' },
+            { varenr: '250-650-0040',   beskrivelse: 'Akustisk Fodg.tryk Prisma (Daps 2000L, RAL5017)', bem: '' },
+            { varenr: '250-650-0041',   beskrivelse: 'Fodgængertryk Prisma (6 Wires)', bem: '' },
+            { varenr: '250-650-0041/1', beskrivelse: 'Fodgængertryk Prisma med Lysring', bem: '' },
+            { varenr: '250-650-0041/2', beskrivelse: 'Fodgængertryk Prisma med Interfacekort 24-49V', bem: '' },
+            { varenr: '250-650-0042',   beskrivelse: 'Cykeltryk Prisma', bem: '' },
+            { varenr: '250-650-0046',   beskrivelse: 'Akustisk signal uden tryk Prisma', bem: '' },
+            { varenr: '250-650-0049',   beskrivelse: 'Akustisk Fodg.tryk Prisma med vibrator', bem: '' },
+            { varenr: '250-650-0050',   beskrivelse: 'Mærkat "Tryk for Grønt" Fodg. tryk', bem: '' },
+            { varenr: '250-650-0062',   beskrivelse: 'Retningspil Prisma K---', bem: '' },
+            { varenr: '250-650-0064',   beskrivelse: 'Retningspil Prisma KK--', bem: '' },
+            { varenr: '250-650-0066',   beskrivelse: 'Retningspil Prisma K-KK', bem: '' },
+            { varenr: '250-650-0068',   beskrivelse: 'Retningspil Prisma K--K', bem: '' },
+            { varenr: '250-650-0069',   beskrivelse: 'Retningspil Prisma KK-KK', bem: '' },
+          ]
+        },
+        {
+          navn: 'RTB',
+          varer: [
+            { varenr: '250-650-0001', beskrivelse: 'RTB Fodg. Tryk Type A 230v', bem: '' },
+            { varenr: '250-650-0002', beskrivelse: 'RTB Akustisk tryk A Pit', bem: 'Uden tryk i bund, hvid kvitteringslys' },
+            { varenr: '250-650-0003', beskrivelse: 'RTB Akustisk tryk F Pit', bem: 'Tryk i bund, hvidt kvitteringslys' },
+            { varenr: '250-650-0005', beskrivelse: 'RTB Fodg. Tryk type A 230v med Relæ', bem: '' },
+            { varenr: '250-550-0051', beskrivelse: 'Makat til fodgængertryk RTB', bem: '' },
+          ]
+        },
+        {
+          navn: 'Swarco',
+          varer: [
+            { varenr: 'INTERN-SW-TOUCH-U',  beskrivelse: 'Swarco Touch uden tryk', bem: '' },
+            { varenr: 'INTERN-SW-TOUCH-F',  beskrivelse: 'Swarco Touch fodgænger tryk', bem: '' },
+            { varenr: 'INTERN-SW-TOUCH-FL', beskrivelse: 'Swarco Touch fodgænger tryk med lyd', bem: '' },
+            { varenr: 'INTERN-SC-FODG',     beskrivelse: 'Scandinavia fodgænger tryk', bem: '' },
+            { varenr: 'INTERN-SC-FODG-L',   beskrivelse: 'Scandinavia fodgænger tryk med lydgiver', bem: '' },
+            { varenr: 'INTERN-SC-UDEN',     beskrivelse: 'Scandinavia uden tryk', bem: '' },
+          ]
+        },
+      ],
+      varer: [] // flad liste til stykliste-opslag
+    },
+    {
+      kategori: 'Beslag og støtteholdere',
+      varer: [
+        { varenr: '167-650-0211', beskrivelse: 'Støtteholder sort kort', bem: '' },
+        { varenr: '167-650-0212', beskrivelse: 'Støtteholder sort lang', bem: '' },
+        { varenr: '167-650-0323', beskrivelse: 'Støtteholder sort', bem: '' },
+        { varenr: '167-650-0231', beskrivelse: 'Top / bund uden støtteholder sort', bem: '' },
+        { varenr: '167-650-0324', beskrivelse: 'Bundskrue kort top / bund sort', bem: '' },
+        { varenr: '270-500-3001', beskrivelse: 'Konsol nedafvendt DSI', bem: '' },
+        { varenr: '270-500-3002', beskrivelse: 'Konsol opadvendt DSI', bem: '' },
+        { varenr: '270-500-3003', beskrivelse: 'Konsol Universal DSI', bem: '' },
+        { varenr: '270-500-3004', beskrivelse: 'Konsol svingbar', bem: '' },
+        { varenr: '270-500-3005', beskrivelse: 'DSI Tophætte', bem: '' },
+        { varenr: '270-500-3006', beskrivelse: 'DSI Mellemhætte', bem: '' },
+        { varenr: '270-500-3008', beskrivelse: 'Ophæng Universal DSI', bem: '' },
+        { varenr: '270-500-3009', beskrivelse: 'Vægbeslag DSI', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Spændbånd',
+      varer: [
+        { varenr: '280-850-0016', beskrivelse: 'Spændbånd 50-70mm Rustfrit stål', bem: '' },
+        { varenr: '280-850-0015', beskrivelse: 'Spændbånd 60-80mm Rustfrit stål', bem: '' },
+        { varenr: '280-850-0014', beskrivelse: 'Spændbånd 80-100mm Rustfrit stål', bem: '' },
+        { varenr: '280-850-0005', beskrivelse: 'Spændbånd 90-110mm Rustfrit stål', bem: '' },
+        { varenr: '280-850-0006', beskrivelse: 'Spændbånd 100-120mm Rustfrit stål', bem: '' },
+        { varenr: '280-850-0008', beskrivelse: 'Spændbånd 120-140mm Rustfrit stål', bem: '' },
+        { varenr: '280-850-0009', beskrivelse: 'Spændbånd 130-150mm Rustfrit stål', bem: '' },
+        { varenr: '280-850-0010', beskrivelse: 'Spændbånd 140-160mm Rustfrit stål', bem: '' },
+        { varenr: '280-850-0011', beskrivelse: 'Spændbånd 150-170mm Rustfrit stål', bem: '' },
+        { varenr: '280-350-0013', beskrivelse: 'Spændbånd 170-190mm Rustfrit stål', bem: '' },
+        { varenr: '998-900-0009', beskrivelse: 'Kabelbinder Sort UV bestandig 4,8 x 249mm', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Smartmicro Radar',
+      varer: [
+        { varenr: '250-650-0160', beskrivelse: 'Smartmicro Type 29', bem: '' },
+        { varenr: '250-650-0161', beskrivelse: 'Smartmicro Type 30', bem: '' },
+        { varenr: '250-650-0165', beskrivelse: 'Smartmicro Type 45', bem: '' },
+        { varenr: '250-650-0164', beskrivelse: 'Smartmicro Type 44', bem: '' },
+        { varenr: '250-650-0167', beskrivelse: 'Smartmicro Type 48', bem: '' },
+        { varenr: '250-650-0159', beskrivelse: 'Kabel UMMR til radar 40/42/44/45/48', bem: '' },
+        { varenr: '250-650-0141', beskrivelse: 'Kabel til radar 10 meter', bem: '' },
+        { varenr: '250-650-0162', beskrivelse: 'Konsol UMMR for Radar 42/48', bem: '' },
+        { varenr: '250-650-0137', beskrivelse: 'Konsol UMMR for Radar 29/44/45', bem: '' },
+        { varenr: '250-650-0190/1', beskrivelse: 'Radartilslutningsbox til Bluetooth 4', bem: '' },
+        { varenr: '250-650-0148', beskrivelse: 'Forlænger arm til Radar', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Heimdall',
+      varer: [
+        { varenr: '167-665-0063', beskrivelse: 'Heimdall 24V radar Stopline', bem: '' },
+        { varenr: '167-665-0065', beskrivelse: 'Heimdall 24V Fodgænger', bem: '' },
+        { varenr: '167-665-0066', beskrivelse: 'Tilslutningsboks til Heimdall', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Flir TrafiOne',
+      varer: [
+        { varenr: '250-650-0118', beskrivelse: 'Flir TrafiOne 195', bem: '' },
+        { varenr: '250-650-0119', beskrivelse: 'Flir TrafiOne 156', bem: '' },
+      ]
+    },
+
+
+    {
+      kategori: 'Netværk og lanternekabel',
+      varer: [
+        { varenr: '250-100-1997', beskrivelse: 'Kabel Kat 6A F/utp 1x4P PE sort', bem: '' },
+        { varenr: '250-100-0363', beskrivelse: 'Lanternekabel 3G1mm Sort', bem: '' },
+        { varenr: '250-100-0362', beskrivelse: 'Lanternekabel 5G1mm Sort', bem: '' },
+        { varenr: '250-100-0365', beskrivelse: 'Lanternekabel 7G1mm Sort', bem: '' },
+        { varenr: '280-700-0831', beskrivelse: 'Kabeldæksbånd 1,8 x 100mm rød', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Klemrækker',
+      varer: [
+        { varenr: '250-300-1001', beskrivelse: 'Klemrække 7-polet', bem: '' },
+        { varenr: '250-300-1002', beskrivelse: 'Klemrække 10-polet', bem: '' },
+        { varenr: '250-300-1003', beskrivelse: 'Klemrække 14-polet', bem: '' },
+        { varenr: '250-300-1004', beskrivelse: 'Klemrække 19-polet', bem: '' },
+        { varenr: '250-300-1005', beskrivelse: 'Klemrække 27-polet', bem: '' },
+        { varenr: '250-300-1007', beskrivelse: 'Klemrække 37-polet', bem: '' },
+        { varenr: '250-300-1008', beskrivelse: 'Klemrække 27+16 polet', bem: '' },
+        { varenr: '250-300-1009', beskrivelse: 'Klemrække 37+16 polet', bem: '' },
+        { varenr: '250-300-1100', beskrivelse: 'Sejldugspose til klemrække', bem: '' },
+        { varenr: '250-300-1010', beskrivelse: 'Jordledning for klemrække til mast', bem: '' },
+        { varenr: 'INTERN-KL-27KBH',    beskrivelse: 'GL. Kbh 27 leder', bem: '' },
+        { varenr: 'INTERN-KL-37KBH',    beskrivelse: 'GL. Kbh 37 leder', bem: '' },
+        { varenr: 'INTERN-KL-27SW',     beskrivelse: 'GL. Swarco 27 leder', bem: '' },
+        { varenr: 'INTERN-KL-37SW',     beskrivelse: 'GL. Swarco 37 leder', bem: '' },
+        { varenr: 'INTERN-KL-27SWNY',   beskrivelse: 'Nyere Swarco 27 leder', bem: '' },
+        { varenr: 'INTERN-KL-37SWNY',   beskrivelse: 'Nyere Swarco 37 leder', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Signaler',
+      varer: [
+        { varenr: 'INTERN-SIG-ALUDSI-4', beskrivelse: 'AluStar DSI 4-lys', bem: '' },
+        { varenr: 'INTERN-SIG-ALUDSI-3', beskrivelse: 'AluStar DSI 3-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ALUDSI-2', beskrivelse: 'AluStar DSI 2-felt fodgænger', bem: '' },
+        { varenr: 'INTERN-SIG-ALUDSI-1', beskrivelse: 'AluStar DSI 1-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ALU2-3',   beskrivelse: 'AluStar 2 punkt 3-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ALU2-2',   beskrivelse: 'AluStar 2 punkt 2-felt fodgænger', bem: '' },
+        { varenr: 'INTERN-SIG-ALU2-1',   beskrivelse: 'AluStar 2 punkt 1-felt', bem: '' },
+        { varenr: 'INTERN-SIG-OP2-4',    beskrivelse: 'Opeka 2 punkt 4-felt', bem: '' },
+        { varenr: 'INTERN-SIG-OP2-3',    beskrivelse: 'Opeka 2 punkt 3-felt', bem: '' },
+        { varenr: 'INTERN-SIG-OP2-2',    beskrivelse: 'Opeka 2 punkt 2-felt', bem: '' },
+        { varenr: 'INTERN-SIG-OP2-1',    beskrivelse: 'Opeka 2 punkt 1-felt', bem: '' },
+        { varenr: 'INTERN-SIG-DSI-4',    beskrivelse: 'Opeka DSI 4-felt', bem: '' },
+        { varenr: 'INTERN-SIG-DSI-3',    beskrivelse: 'Opeka DSI 3-felt', bem: '' },
+        { varenr: 'INTERN-SIG-DSI-2',    beskrivelse: 'Opeka DSI 2-felt', bem: '' },
+        { varenr: 'INTERN-SIG-DSI-1',    beskrivelse: 'Opeka DSI 1-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ATKIDSI-4', beskrivelse: 'Atki DSI 4-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ATKIDSI-3', beskrivelse: 'Atki DSI 3-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ATKIDSI-2', beskrivelse: 'Atki DSI 2-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ATKIDSI-1', beskrivelse: 'Atki DSI 1-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ATKI2-4',  beskrivelse: 'Atki 2 punkt 4-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ATKI2-3',  beskrivelse: 'Atki 2 punkt 3-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ATKI2-2',  beskrivelse: 'Atki 2 punkt 2-felt', bem: '' },
+        { varenr: 'INTERN-SIG-ATKI2-1',  beskrivelse: 'Atki 2 punkt 1-felt', bem: '' },
+        { varenr: 'INTERN-SIG-GL2-4',    beskrivelse: 'Glødepære 2 punkt 4-felt', bem: '' },
+        { varenr: 'INTERN-SIG-GL2-3',    beskrivelse: 'Glødepære 2 punkt 3-felt', bem: '' },
+        { varenr: 'INTERN-SIG-GL2-2',    beskrivelse: 'Glødepære 2 punkt 2-felt', bem: '' },
+        { varenr: 'INTERN-SIG-GL2-1',    beskrivelse: 'Glødepære 2 punkt 1-felt', bem: '' },
+        { varenr: 'INTERN-SIG-GLDSI-4',  beskrivelse: 'Glødepære DSI 4-felt', bem: '' },
+        { varenr: 'INTERN-SIG-GLDSI-3',  beskrivelse: 'Glødepære DSI 3-felt', bem: '' },
+        { varenr: 'INTERN-SIG-GLDSI-2',  beskrivelse: 'Glødepære DSI 2-felt', bem: '' },
+        { varenr: 'INTERN-SIG-GLDSI-1',  beskrivelse: 'Glødepære DSI 1-felt', bem: '' },
+        { varenr: 'INTERN-SIG-SUNBURST-4', beskrivelse: 'Sunburst DSI 4-lys', bem: '' },
+        { varenr: 'INTERN-SIG-SUNBURST-3', beskrivelse: 'Sunburst DSI 3-lys', bem: '' },
+        { varenr: 'INTERN-SIG-SUNBURST-2', beskrivelse: 'Sunburst DSI 2-lys', bem: '' },
+        { varenr: 'INTERN-SIG-SUNBURST-1', beskrivelse: 'Sunburst DSI 1-lys', bem: '' },
+      ]
+    },
+    {
+      kategori: 'Diverse',
+      varer: [
+        { varenr: '167-650-0685', beskrivelse: 'Baggrundsplade Siemens', bem: '' },
+        { varenr: '250-600-0336', beskrivelse: 'Skumringsrelæ 2-200 Lux på master', bem: '' },
+      ]
+    },
+
+  ];
+
+  // Hjælpefunktion: slå varenr op (inkl. underkategorier)
+  function findVare(varenr) {
+    for (const kat of VAREKATALOG) {
+      if (kat.underkategorier) {
+        for (const under of kat.underkategorier) {
+          const v = under.varer.find(v => v.varenr === varenr);
+          if (v) return v;
+        }
+      } else {
+        const v = kat.varer.find(v => v.varenr === varenr);
+        if (v) return v;
+      }
+    }
+    return null;
+  }
+
+  // Hjælpefunktion: slå mastetype op
+  function findMasteVarenr(label) {
+    for (const g of MASTETYPER_GRUPPER) {
+      const m = g.typer.find(t => t.label === label);
+      if (m) return m.varenr;
+    }
+    return '';
+  }
+
+  const UDSTYR_TYPER = VAREKATALOG.flatMap(k => k.varer ? k.varer.map(v => v.varenr) : []); // legacy compat
+
+  // Kategorier der vises i Ekstra Udstyr menuen (ikke master/signalhoveder)
+  const SKJULTE_KATEGORIER = [
+    'Master til nedgravning', 'Alu-round master', 'DSI Galgemaster', 'Danintra master', 'Milewide master',
+    'Fundamentplader', 'Mastetilbehør',
+    'Signalhoveder – Lanterner 5W', 'Signalhoveder – Lanterner 17W',
+    'Signalhoveder – Lanterner 24V (Siemens Sx)', 'Signalhoveder – Lanterner 17W DSI',
+    'Silux2 LED moduler 200mm', 'Signaler',
+  ];
+  const UDSTYR_MENU = VAREKATALOG.filter(k => !SKJULTE_KATEGORIER.includes(k.kategori));
+
+  const MASTETYPER_GRUPPER = [
+    {
+      gruppe: 'Master til nedgravning',
+      typer: [
+        { label: 'Høj mast 5,1m ø127',        varenr: '270-200-0105' },
+        { label: 'Lav mast 3,1m ø127',         varenr: '270-200-0104' },
+        { label: 'Mast 2,0m til Cykelsignal ø127', varenr: '270-200-0106' },
+        { label: 'Tryk mast m. Luge',          varenr: '270-200-0103' },
+        { label: 'Mast 6,1m Ø127 til Radar',   varenr: '270-200-0109' },
+      ]
+    },
+    {
+      gruppe: 'Alu-round master',
+      typer: [
+        { label: 'Alu-round 1,4m Ø135',           varenr: '270-200-0301' },
+        { label: 'Alu-round 2,1m Ø135 til Cykelsignal', varenr: '270-200-0305' },
+        { label: 'Alu-round 3,1m Ø135',           varenr: '270-200-0302' },
+        { label: 'Alu-round 5,3m Ø165',           varenr: '270-200-0303' },
+        { label: 'Alu-round 6,3m ø165 til Radar', varenr: '270-200-0308' },
+      ]
+    },
+    {
+      gruppe: 'DSI master',
+      typer: [
+        { label: 'Lav DSI mast',            varenr: '270-200-0141' },
+        { label: 'Høj DSI mast',            varenr: '270-200-0142' },
+        { label: 'DSI Galgemast cykel',     varenr: '270-200-0144' },
+        { label: 'DSI Galgemast høj',       varenr: '270-200-0146' },
+        { label: 'DSI Video mast 10m',      varenr: 'INTERN-MAST-DSIVIDEO' },
+        { label: 'DSI Kombimast',           varenr: 'INTERN-MAST-DSIKOMBI' },
+      ]
+    },
+    {
+      gruppe: 'Milewide master',
+      typer: [
+        { label: 'Milewide Lav',                      varenr: '270-200-0409' },
+        { label: 'Milewide Høj',                      varenr: '270-200-0404' },
+        { label: 'Milewide Cykel Galge',              varenr: '270-200-0405' },
+        { label: 'Milewide Høj Galge',                varenr: '270-200-0420' },
+        { label: 'Milewide Tryk Stander',             varenr: '270-200-0402' },
+        { label: 'Milewide Kombi 10m med Fodflange',  varenr: '270-200-0411' },
+      ]
+    },
+    {
+      gruppe: 'Danintra master',
+      typer: [
+        { label: 'Danintra Mast 1.4m til Fodg. Tryk', varenr: '270-200-0201' },
+        { label: 'Danintra Mast 2.0m til Cykelsignal', varenr: '270-200-0202' },
+        { label: 'Danintra Mast Lav 3.1m',             varenr: '270-200-0203' },
+        { label: 'Danintra Mast Høj 5.2m',             varenr: '270-200-0204' },
+        { label: 'Danintra Kombimast 10m',             varenr: '270-200-0221' },
+      ]
+    },
+  ];
+
+  // Vis varenr — skjul interne ID'er
+  function visVarenr(varenr) {
+    if (!varenr || varenr.startsWith('INTERN-')) return '';
+    return varenr;
+  }
+
+  const STORAGE_PREFIX = 'signalanlaeg:';
+
+  // Holder styr på hvilke master er kollapsede (overlever re-render)
+  const collapsedMaster = new Set();
+  // Holder styr på åbne signal/udstyr sektioner pr. mast
+  const openSigSections = new Set();
+  const openUdstyrSections = new Set();
+
+  // Mast-filter til output (null = alle)
+  let mastFilter = null;
+
+  function renderMastFilter() {
+    const wrap = $('mast-filter-wrap');
+    const container = $('mast-filter-checkboxes');
+    if (!wrap || !container) return;
+    if (state.master.length === 0) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+    if (!mastFilter) mastFilter = new Set(state.master.map(m => m.mastId));
+    container.innerHTML = state.master.map(m => {
+      const checked = mastFilter.has(m.mastId);
+      return `<label class="${checked ? 'checked' : ''}">
+        <input type="checkbox" data-mast-filter="${escapeHtml(m.mastId)}" ${checked ? 'checked' : ''} />
+        ${escapeHtml(m.mastId)}
+      </label>`;
+    }).join('');
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', e => {
+        const id = e.target.dataset.mastFilter;
+        if (e.target.checked) mastFilter.add(id); else mastFilter.delete(id);
+        e.target.closest('label').className = mastFilter.has(id) ? 'checked' : '';
+        opdaterOutput();
+      });
+    });
+  }
+
+  // Auto-gem timer
+  let autoGemTimer = null;
+  function planAutoGem() {
+    clearTimeout(autoGemTimer);
+    autoGemTimer = setTimeout(() => {
+      const idDel = state.nr.trim() || state.navn.trim();
+      if (!idDel) return;
+      const key = STORAGE_PREFIX + idDel.replace(/[^a-zA-Z0-9æøåÆØÅ_-]/g, '_');
+      try {
+        localStorage.setItem(key, JSON.stringify(state));
+        opdaterGemtListe();
+        $('gemte-anlaeg').value = key;
+        // Auto-push til GitHub hvis konfigureret
+        const cfg = githubIndstillinger();
+        if (cfg && cfg.token && cfg.owner && cfg.repo) {
+          githubPushEnkelt(key).then(() => {
+            visBesked('✓ Auto-gemt og synkroniseret');
+          }).catch(() => {
+            visBesked('✓ Auto-gemt (GitHub sync fejlede)');
+          });
+        } else {
+          visBesked('✓ Auto-gemt');
+        }
+      } catch (err) { /* stille fejl */ }
+    }, 15000);
+  }
+
+  // ==============================
+  // State
+  // ==============================
+  let state = tomtAnlaeg();
+
+  function tomtAnlaeg() {
+    return {
+      nr: '',
+      navn: '',
+      master: []
+    };
+  }
+
+  // ==============================
+  // Hjælpefunktioner
+  // ==============================
+  const $ = id => document.getElementById(id);
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[c]));
+  }
+
+  function fullTegningsnr() {
+    return state.nr || '';
+  }
+
+  function visBesked(tekst, type = 'success') {
+    const el = $('status-besked');
+    el.textContent = tekst;
+    el.style.color = type === 'danger' ? 'var(--danger)' : 'var(--success)';
+    setTimeout(() => { el.textContent = ''; }, 2500);
+  }
+
+  // ==============================
+  // Rendering
+  // ==============================
+  function renderMaster() {
+    const container = $('master-liste');
+    if (state.master.length === 0) {
+      container.innerHTML = '<section class="card"><p class="empty-state">Ingen master tilføjet endnu. Opret en ovenfor.</p></section>';
+      return;
+    }
+    container.innerHTML = state.master.map((mast, mastIdx) => renderMastCard(mast, mastIdx)).join('');
+    // Gendan kollaps-state for master
+    state.master.forEach((mast, mastIdx) => {
+      if (collapsedMaster.has(mastIdx)) {
+        const card = container.querySelectorAll('.mast-card')[mastIdx];
+        if (!card) return;
+        const body = card.querySelector('.mast-body');
+        const summary = card.querySelector('.mast-summary');
+        const btn = card.querySelector('.btn-collapse');
+        if (body) body.style.display = 'none';
+        if (summary) summary.style.display = '';
+        if (btn) btn.textContent = '▸';
+        card.dataset.collapsed = 'true';
+      }
+      // Gendan åbne signal/udstyr sektioner
+      const card = container.querySelectorAll('.mast-card')[mastIdx];
+      if (!card) return;
+      if (openSigSections.has(mastIdx)) {
+        const body = card.querySelector('.sig-section-body');
+        const arrow = card.querySelector('.mast-section-toggle[data-action="toggle-sig-section"] .btn-collapse');
+        if (body) body.style.display = '';
+        if (arrow) arrow.textContent = '▾';
+      }
+      if (openUdstyrSections.has(mastIdx)) {
+        const body = card.querySelector('.udstyr-section-body');
+        const arrow = card.querySelector('.mast-section-toggle[data-action="toggle-udstyr-section"] .btn-collapse');
+        if (body) body.style.display = '';
+        if (arrow) arrow.textContent = '▾';
+      }
+    });
+  }
+
+  function renderMastCard(mast, mastIdx) {
+    const armVarenr = '250-650-0148';
+    const armVare = findVare(armVarenr);
+    let armVistPåKort = false;
+
+    const udstyrHtml = (mast.udstyr && mast.udstyr.length > 0)
+      ? mast.udstyr.map((u, uIdx) => {
+          const vare = u.varenr ? findVare(u.varenr) : null;
+          const erKabel = KABEL_VARENUMRE.includes(u.varenr);
+          const antalLabel = erKabel && u.antal ? `${u.antal}m ` : (u.antal && u.antal > 1 ? `${u.antal}× ` : '');
+          const autoVarer = autoVarerForUdstyr(u, mast.mastetype);
+
+          // Vis forlænger arm auto-vare — kun første gang på dette mastkort
+          let armHtml = '';
+          if (u.forlængerArm && RADAR_VARENUMRE.includes(u.varenr) && !armVistPåKort) {
+            armVistPåKort = true;
+            armHtml = `<div class="auto-vare-row">
+              <span class="auto-vare-ikon">↳</span>
+              <span class="auto-vare-label">1× ${escapeHtml(armVare ? armVare.beskrivelse : armVarenr)}</span>
+              <span class="badge badge-auto">auto</span>
+            </div>`;
+          }
+
+          if (u._redigerer) {
+            return `
+              <div class="item-row rediger-row">
+                <span class="rediger-label">Redigerer udstyr:</span>
+                <div class="add-form">
+                  <div class="field"><label>Kategori</label>
+                    <select data-rediger-u="kategori" data-mast="${mastIdx}" data-udstyr="${uIdx}">
+                      ${UDSTYR_MENU.map(k => `<option value="${escapeHtml(k.kategori)}"${k.kategori === (findVareKategoriNavn(u.varenr)) ? ' selected' : ''}>${escapeHtml(k.kategori)}</option>`).join('')}
+                    </select></div>
+                  <div class="field"><label>Vare</label>
+                    <select data-rediger-u="varenr" data-mast="${mastIdx}" data-udstyr="${uIdx}">
+                      ${(findVareKategoriVarer(u.varenr) || []).filter(v => !v.varenr.startsWith('INTERN-')).map(v => `<option value="${escapeHtml(v.varenr)}"${v.varenr === u.varenr ? ' selected' : ''}>${escapeHtml(v.beskrivelse)}</option>`).join('')}
+                    </select></div>
+                  <div class="field field-small"><label>Antal</label>
+                    <input type="number" data-rediger-u="antal" data-mast="${mastIdx}" data-udstyr="${uIdx}" value="${u.antal || 1}" min="0.5" step="0.5" /></div>
+                  <div class="field"><label>Betegnelse</label>
+                    <input type="text" data-rediger-u="betegnelse" data-mast="${mastIdx}" data-udstyr="${uIdx}" value="${escapeHtml(u.betegnelse || '')}" /></div>
+                  <button class="btn-primary" data-action="gem-udstyr" data-mast="${mastIdx}" data-udstyr="${uIdx}">Gem</button>
+                  <button class="btn-secondary" data-action="annuller-udstyr" data-mast="${mastIdx}" data-udstyr="${uIdx}">Annullér</button>
+                </div>
+              </div>`;
+          }
+
+          const autoHtml = autoVarer.map((v, aIdx) => {
+            const autoVare = findVare(v.varenr);
+            const override = (u._autoOverrides || {})[aIdx] || {};
+            if (override._slettet) return ''; // slettet
+            const visAntal = override.antal !== undefined ? override.antal : v.antal;
+            const visVarenrAuto = override.varenr || v.varenr;
+            const visVare = findVare(visVarenrAuto);
+            const aLabel = Number.isInteger(visAntal) ? `${visAntal}×` : `${visAntal}m`;
+
+            if (override._redigerer) {
+              const antalDd = bygAntalDropdownHtml(visAntal);
+              const varenrDd = bygVareDropdownHtml(v.varenr, visVarenrAuto);
+              return `<div class="auto-vare-row rediger-auto-row">
+                <span class="auto-vare-ikon">↳</span>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1">
+                  <div style="display:flex;flex-direction:column;gap:2px">
+                    <label style="font-size:10px;color:var(--text-subtle)">Antal</label>
+                    <span id="auto-u-antal-wrap-${mastIdx}-${uIdx}-${aIdx}">${antalDd}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:2px">
+                    <label style="font-size:10px;color:var(--text-subtle)">Vare</label>
+                    <span id="auto-u-varenr-wrap-${mastIdx}-${uIdx}-${aIdx}">${varenrDd}</span>
+                  </div>
+                  <div style="display:flex;gap:4px;align-self:flex-end">
+                    <button class="btn-primary" style="padding:4px 12px;font-size:12px" data-action="gem-auto-udstyr" data-mast="${mastIdx}" data-udstyr="${uIdx}" data-auto="${aIdx}">Gem</button>
+                    <button class="btn-secondary" style="padding:4px 10px;font-size:12px" data-action="annuller-auto-udstyr" data-mast="${mastIdx}" data-udstyr="${uIdx}" data-auto="${aIdx}">Annullér</button>
+                  </div>
+                </div>
+              </div>`;
+            }
+            return `<div class="auto-vare-row">
+              <span class="auto-vare-ikon">↳</span>
+              <span class="auto-vare-label">${aLabel} ${escapeHtml(visVare ? visVare.beskrivelse : visVarenrAuto)}</span>
+              <span class="badge badge-auto">${override.varenr || override.antal !== undefined ? 'ændret' : 'auto'}</span>
+              <button class="btn-icon btn-rediger" style="font-size:10px;padding:1px 6px;margin-left:auto" data-action="rediger-auto-udstyr" data-mast="${mastIdx}" data-udstyr="${uIdx}" data-auto="${aIdx}" title="Redigér auto-vare">✎</button>
+              <button class="btn-icon" style="font-size:10px;padding:1px 6px" data-action="slet-auto-udstyr" data-mast="${mastIdx}" data-udstyr="${uIdx}" data-auto="${aIdx}" title="Slet auto-vare">×</button>
+            </div>`;
+          }).join('');
+          return `
+            <div class="item-row">
+              <span class="badge badge-warning">${escapeHtml(visVarenr(u.varenr) || u.type || '')}</span>
+              <span class="item-label">${antalLabel}${escapeHtml(vare ? vare.beskrivelse : (u.type || ''))}${u.forlængerArm ? ' <span class="badge badge-neutral" style="font-size:10px">arm</span>' : ''}${u.klistermaerke ? ' <span class="badge badge-neutral" style="font-size:10px">🏷 mærkat</span>' : ''}</span>
+              ${u.betegnelse ? `<span class="item-note">${escapeHtml(u.betegnelse)}</span>` : ''}
+              <button class="btn-icon btn-rediger" data-action="rediger-udstyr" data-mast="${mastIdx}" data-udstyr="${uIdx}" title="Redigér">✎</button>
+              <button class="btn-icon" data-action="del-udstyr" data-mast="${mastIdx}" data-udstyr="${uIdx}">×</button>
+            </div>
+            ${armHtml}
+            ${autoHtml}
+          `;
+        }).join('')
+      : '<p class="empty-state">Intet ekstra udstyr</p>';
+
+    const signalerHtml = mast.signaler.length > 0
+      ? mast.signaler.map((sig, sigIdx) => {
+          // Redigér-mode
+          if (sig._redigerer) {
+            const hojdeOpts = HOJDE_MULIGHEDER.map(h =>
+              `<option value="${escapeHtml(h)}"${h === sig.hojde ? ' selected' : ''}>${h || '—'}</option>`
+            ).join('');
+            const katOpts = SIGNAL_KATEGORIER.map(k =>
+              `<option value="${escapeHtml(k.kategori)}"${k.kategori === sig.kategori ? ' selected' : ''}>${escapeHtml(k.kategori)}</option>`
+            ).join('');
+            const valgtKat = SIGNAL_KATEGORIER.find(k => k.kategori === sig.kategori);
+            const typeOpts = valgtKat ? valgtKat.typer.map(ty =>
+              `<option value="${escapeHtml(ty.label)}"${ty.label === sig.type ? ' selected' : ''}>${escapeHtml(ty.label)}</option>`
+            ).join('') : `<option value="${escapeHtml(sig.type)}">${escapeHtml(sig.type)}</option>`;
+            return `
+              <div class="item-row rediger-row">
+                <span class="rediger-label">Redigerer signal:</span>
+                <div class="add-form">
+                  <div class="field"><label>Kategori</label>
+                    <select data-rediger-sig="kategori" data-mast="${mastIdx}" data-sig="${sigIdx}">${katOpts}</select></div>
+                  <div class="field"><label>Type</label>
+                    <select data-rediger-sig="type" data-mast="${mastIdx}" data-sig="${sigIdx}">${typeOpts}</select></div>
+                  <div class="field field-small"><label>Betegnelse</label>
+                    <input type="text" data-rediger-sig="betegnelse" data-mast="${mastIdx}" data-sig="${sigIdx}" value="${escapeHtml(sig.betegnelse || '')}" /></div>
+                  <div class="field field-small"><label>Højde</label>
+                    <select data-rediger-sig="hojde" data-mast="${mastIdx}" data-sig="${sigIdx}">${hojdeOpts}</select></div>
+                  <div class="field"><label>Note</label>
+                    <input type="text" data-rediger-sig="note" data-mast="${mastIdx}" data-sig="${sigIdx}" value="${escapeHtml(sig.note || '')}" /></div>
+                  ${sig.kategori && sig.kategori.includes('Ercolight') ? `
+                  <div class="field" style="justify-content:flex-end">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;font-size:13px;color:var(--text)">
+                      <input type="checkbox" data-rediger-sig="pilemaske" data-mast="${mastIdx}" data-sig="${sigIdx}" style="width:auto;min-height:auto;cursor:pointer" ${sig.pilemaske ? 'checked' : ''} />
+                      Med pilemaske
+                    </label>
+                  </div>` : ''}
+                  <button class="btn-primary" data-action="gem-sig" data-mast="${mastIdx}" data-sig="${sigIdx}">Gem</button>
+                  <button class="btn-secondary" data-action="annuller-sig" data-mast="${mastIdx}" data-sig="${sigIdx}">Annullér</button>
+                </div>
+              </div>`;
+          }
+          const autoVarer = autoVarerForSignal(sig);
+          const autoHtml = autoVarer.map((v, aIdx) => {
+            const override = (sig._autoOverrides || {})[aIdx] || {};
+            if (override._slettet) return ''; // slettet
+            const visAntal = override.antal !== undefined ? override.antal : v.antal;
+            const visVarenrAuto = override.varenr || v.varenr;
+            const visVare = findVare(visVarenrAuto);
+            const aLabel = Number.isInteger(visAntal) ? `${visAntal}×` : `${visAntal}m`;
+
+            if (override._redigerer) {
+              const antalDd = bygAntalDropdownHtml(visAntal);
+              const varenrDd = bygVareDropdownHtml(v.varenr, visVarenrAuto);
+              return `<div class="auto-vare-row rediger-auto-row">
+                <span class="auto-vare-ikon">↳</span>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1">
+                  <div style="display:flex;flex-direction:column;gap:2px">
+                    <label style="font-size:10px;color:var(--text-subtle)">Antal</label>
+                    <span id="auto-sig-antal-wrap-${mastIdx}-${sigIdx}-${aIdx}">${antalDd}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:2px">
+                    <label style="font-size:10px;color:var(--text-subtle)">Vare</label>
+                    <span id="auto-sig-varenr-wrap-${mastIdx}-${sigIdx}-${aIdx}">${varenrDd}</span>
+                  </div>
+                  <div style="display:flex;gap:4px;align-self:flex-end">
+                    <button class="btn-primary" style="padding:4px 12px;font-size:12px" data-action="gem-auto-sig" data-mast="${mastIdx}" data-sig="${sigIdx}" data-auto="${aIdx}">Gem</button>
+                    <button class="btn-secondary" style="padding:4px 10px;font-size:12px" data-action="annuller-auto-sig" data-mast="${mastIdx}" data-sig="${sigIdx}" data-auto="${aIdx}">Annullér</button>
+                  </div>
+                </div>
+              </div>`;
+            }
+            return `<div class="auto-vare-row">
+              <span class="auto-vare-ikon">↳</span>
+              <span class="auto-vare-label">${aLabel} ${escapeHtml(visVare ? visVare.beskrivelse : visVarenrAuto)}</span>
+              <span class="badge badge-auto">${override.varenr || override.antal !== undefined ? 'ændret' : 'auto'}</span>
+              <button class="btn-icon btn-rediger" style="font-size:10px;padding:1px 6px;margin-left:auto" data-action="rediger-auto-sig" data-mast="${mastIdx}" data-sig="${sigIdx}" data-auto="${aIdx}" title="Redigér auto-vare">✎</button>
+              <button class="btn-icon" style="font-size:10px;padding:1px 6px" data-action="slet-auto-sig" data-mast="${mastIdx}" data-sig="${sigIdx}" data-auto="${aIdx}" title="Slet auto-vare">×</button>
+            </div>`;
+          }).join('');
+          const hojdeBadge = sig.hojde
+            ? `<span class="badge badge-neutral">${escapeHtml(sig.hojde)}</span>`
+            : `<span class="badge badge-hojde-advarsel" title="Højde er ikke valgt">⚠ Højde</span>`;
+          const pilemaskeBadge = sig.pilemaske ? `<span class="badge badge-neutral" style="font-size:10px">🔺 Pilemaske</span>` : '';
+          return `
+            <div class="item-row">
+              <span class="badge">${escapeHtml(sig.betegnelse || '?')}</span>
+              <span class="item-label">${escapeHtml(sig.type)}</span>
+              ${hojdeBadge}
+              ${pilemaskeBadge}
+              ${sig.note ? `<span class="item-note">${escapeHtml(sig.note)}</span>` : ''}
+              <button class="btn-icon btn-rediger" data-action="rediger-sig" data-mast="${mastIdx}" data-sig="${sigIdx}" title="Redigér">✎</button>
+              <button class="btn-icon" data-action="del-signal" data-mast="${mastIdx}" data-sig="${sigIdx}">×</button>
+            </div>
+            ${autoHtml}
+          `;
+        }).join('')
+      : '<p class="empty-state">Ingen signaler</p>';
+
+    const udstyrOptions = UDSTYR_TYPER.map(u => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
+    const signalOptions = SIGNAL_TYPER.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    const hojdeOptions = HOJDE_MULIGHEDER.map(h => `<option value="${escapeHtml(h)}">${h || '—'}</option>`).join('');
+    const mastetypeOptions = MASTETYPER_GRUPPER.map(g =>
+      `<optgroup label="${escapeHtml(g.gruppe)}">${g.typer.map(m =>
+        `<option value="${escapeHtml(m.label)}"${m.label === mast.mastetype ? ' selected' : ''}>${escapeHtml(m.label)}</option>`
+      ).join('')}</optgroup>`
+    ).join('');
+
+    const signalerCount = mast.signaler.length;
+    const udstyrCount = (mast.udstyr || []).length;
+    const summary = [
+      signalerCount > 0 ? `${signalerCount} signal${signalerCount > 1 ? 'er' : ''}` : '',
+      udstyrCount > 0 ? `${udstyrCount} udstyr` : ''
+    ].filter(Boolean).join(', ');
+
+    const mastAutoVarer = autoVarerForMast(mast);
+    const mastAutoHtml = mastAutoVarer.map(v => {
+      const vare = findVare(v.varenr);
+      return `<div class="auto-vare-row" style="margin-bottom:3px">
+        <span class="auto-vare-ikon">↳</span>
+        <span class="auto-vare-label">${v.antal}× ${escapeHtml(vare ? vare.beskrivelse : v.varenr)}</span>
+        <span class="badge badge-auto">auto</span>
+      </div>`;
+    }).join('');
+
+    return `
+      <section class="mast-card" data-collapsed="false">
+        <div class="mast-header">
+          <div style="display:flex;align-items:center;gap:0.5rem;flex:1;min-width:0;flex-wrap:wrap;">
+            <button class="btn-collapse" data-action="toggle-mast" data-mast="${mastIdx}" title="Fold/unfold">▾</button>
+            ${mast._redigerer ? `
+              <input type="text" data-field="mast-id-edit" data-mast="${mastIdx}" value="${escapeHtml(mast.mastId)}" style="width:80px;font-size:15px;font-weight:700;padding:4px 8px" />
+              <select data-field="mastetype-edit" data-mast="${mastIdx}" style="font-size:12px;padding:4px 8px;flex:1;min-width:120px">${mastetypeOptions}</select>
+              <button class="btn-primary" style="padding:4px 12px;font-size:12px" data-action="gem-mast" data-mast="${mastIdx}">Gem</button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" data-action="annuller-mast" data-mast="${mastIdx}">Annullér</button>
+            ` : `
+              <span class="mast-title">${escapeHtml(mast.mastId)}</span>
+              <span class="mast-subtype-label">${escapeHtml(mast.mastetype)}</span>
+              <span class="mast-summary" style="display:none">${escapeHtml(summary)}</span>
+            `}
+          </div>
+          <div style="display:flex;gap:4px">
+            ${mast._redigerer ? '' : `<button class="btn-icon btn-rediger" data-action="rediger-mast" data-mast="${mastIdx}" title="Redigér mast">✎</button>`}
+            <button class="btn-icon" data-action="del-mast" data-mast="${mastIdx}">Slet</button>
+          </div>
+        </div>
+        ${mastAutoHtml ? `<div style="padding:0 0 0.5rem">${mastAutoHtml}</div>` : ''}
+
+        <div class="mast-body">
+          <div class="mast-section">
+            <div class="mast-section-toggle" data-action="toggle-sig-section" data-mast="${mastIdx}" style="cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none">
+              <span class="btn-collapse" style="font-size:14px">▸</span>
+              <span class="mast-section-label" style="margin:0">Signaler ${mast.signaler.length > 0 ? `<span class="badge" style="font-size:10px;padding:1px 7px">${mast.signaler.length}</span>` : ''}</span>
+            </div>
+            <div class="sig-section-body" style="display:none">
+              ${signalerHtml}
+              <div class="add-form">
+                <div class="field">
+                  <label>Kategori</label>
+                  <select data-field="signalkategori" data-mast="${mastIdx}">
+                    <option value="">— Vælg kategori —</option>
+                    ${SIGNAL_KATEGORIER.map(k => `<option value="${escapeHtml(k.kategori)}">${escapeHtml(k.kategori)}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Præcis type</label>
+                  <select data-field="signaltype" data-mast="${mastIdx}" disabled>
+                    <option value="">— Vælg kategori først —</option>
+                  </select>
+                </div>
+                <div class="field field-small">
+                  <label>Betegnelse</label>
+                  <input type="text" data-field="betegnelse" data-mast="${mastIdx}" placeholder="A1H" />
+                </div>
+                <div class="field field-small">
+                  <label>Højde</label>
+                  <select data-field="ny-hojde" data-mast="${mastIdx}">${hojdeOptions}</select>
+                </div>
+                <div class="field">
+                  <label>Note</label>
+                  <input type="text" data-field="note" data-mast="${mastIdx}" placeholder="(valgfri)" />
+                </div>
+                <div class="field" id="pilemaske-wrap-${mastIdx}" style="display:none;justify-content:flex-end">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;font-size:13px;color:var(--text)">
+                    <input type="checkbox" data-field="pilemaske" data-mast="${mastIdx}" style="width:auto;min-height:auto;cursor:pointer" />
+                    Med pilemaske
+                  </label>
+                </div>
+                <button class="btn-secondary" data-action="add-signal" data-mast="${mastIdx}">+ Tilføj signal</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mast-section">
+            <div class="mast-section-toggle" data-action="toggle-udstyr-section" data-mast="${mastIdx}" style="cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none">
+              <span class="btn-collapse" style="font-size:14px">▸</span>
+              <span class="mast-section-label" style="margin:0">Ekstra udstyr ${(mast.udstyr||[]).length > 0 ? `<span class="badge badge-warning" style="font-size:10px;padding:1px 7px">${mast.udstyr.length}</span>` : ''}</span>
+            </div>
+            <div class="udstyr-section-body" style="display:none">
+              ${udstyrHtml}
+              <div class="add-form">
+                <div class="field">
+                  <label>Kategori</label>
+                  <select data-field="udstyrkategori" data-mast="${mastIdx}">
+                    <option value="">— Vælg kategori —</option>
+                    ${UDSTYR_MENU.map(k => `<option value="${escapeHtml(k.kategori)}">${escapeHtml(k.kategori)}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="field" id="udstyr-under-wrap-${mastIdx}" style="display:none">
+                  <label>Underkategori</label>
+                  <select data-field="udstyrunderkategori" data-mast="${mastIdx}" disabled>
+                    <option value="">— Vælg underkategori —</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Vare</label>
+                  <select data-field="udstyrtype" data-mast="${mastIdx}" disabled>
+                    <option value="">— Vælg kategori først —</option>
+                  </select>
+                </div>
+                <div class="field field-small" id="udstyr-meter-wrap-${mastIdx}" style="display:none">
+                  <label>Meter</label>
+                  <input type="number" data-field="udstyrmeter" data-mast="${mastIdx}" placeholder="m" min="0.5" step="0.5" style="min-width:60px" />
+                </div>
+                <div class="field field-small" id="udstyr-antal-wrap-${mastIdx}">
+                  <label>Antal</label>
+                  <input type="number" data-field="udstyrantal" data-mast="${mastIdx}" placeholder="1" min="1" step="1" value="1" style="min-width:60px" />
+                </div>
+                <div class="field field-small" id="udstyr-arm-wrap-${mastIdx}" style="display:none">
+                  <label>På arm?</label>
+                  <select data-field="udstyrarm" data-mast="${mastIdx}">
+                    <option value="nej">Nej</option>
+                    <option value="ja">Ja</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Betegnelse (valgfri)</label>
+                  <input type="text" data-field="udstyrbetegnelse" data-mast="${mastIdx}" placeholder="fx Radar 1" />
+                </div>
+                <div class="field" id="udstyr-klisterm-wrap-${mastIdx}" style="display:none;justify-content:flex-end">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;font-size:13px;color:var(--text)">
+                    <input type="checkbox" data-field="udstyrklistermaerke" data-mast="${mastIdx}" style="width:auto;min-height:auto;cursor:pointer" />
+                    Med klistermærke
+                  </label>
+                </div>
+                <button class="btn-secondary" data-action="add-udstyr" data-mast="${mastIdx}">+ Tilføj udstyr</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function filtereredeMaster() {
+    if (!mastFilter) return state.master;
+    return state.master.filter(m => mastFilter.has(m.mastId));
+  }
+  function generateTekst() {
+    const dato = new Date().toISOString().slice(0, 10);
+    const nummer = fullTegningsnr();
+    const titel = nummer
+      ? `ANLAEG ${nummer}${state.navn ? ' - ' + state.navn : ''}`
+      : `ANLAEG: ${state.navn || '(uden navn)'}`;
+    let t = titel + '\n' + '='.repeat(titel.length) + '\n\n';
+    if (state.nr) t += `Anlaegsnummer:   ${state.nr}\n`;
+    t += `Dato:            ${dato}\n`;
+    t += `Antal master:    ${filtereredeMaster().length}\n`;
+    const totalSignaler = state.master.reduce((sum, m) => sum + m.signaler.length, 0);
+    t += `Antal signaler:  ${totalSignaler}\n\n`;
+
+    if (filtereredeMaster().length === 0) {
+      t += 'Ingen master tilfoejt endnu.\n';
+    } else {
+      filtereredeMaster().forEach(mast => {
+        const masteVarenr = findMasteVarenr(mast.mastetype);
+        const header = `${mast.mastId} - ${mast.mastetype}${masteVarenr ? ' [' + masteVarenr + ']' : ''}`;
+        t += header + '\n' + '-'.repeat(header.length) + '\n';
+
+        // Mast auto-varer
+        const mastAutoVarer = autoVarerForMast(mast);
+        if (mastAutoVarer.length > 0) {
+          t += '\nAuto-tilfoejt til mast:\n';
+          mastAutoVarer.forEach(v => {
+            const vare = findVare(v.varenr);
+            t += `  >> ${vare ? vare.beskrivelse : v.varenr} x ${v.antal} stk. [${v.varenr}]\n`;
+          });
+        }
+
+        if (mast.signaler.length === 0) {
+          t += '\nIngen signaler.\n';
+        } else {
+          t += '\nSignaler:\n';
+          mast.signaler.forEach(sig => {
+            const vn = visVarenr(sig.varenr);
+            let line = `  * ${sig.betegnelse || '?'}: ${sig.type}`;
+            if (sig.hojde) line += ` (${sig.hojde})`;
+            if (vn) line += ` [${vn}]`;
+            if (sig.note) line += ` - ${sig.note}`;
+            t += line + '\n';
+            autoVarerForSignal(sig).forEach((v, aIdx) => {
+              const override = (sig._autoOverrides || {})[aIdx] || {};
+              const varenr = override.varenr || v.varenr;
+              const antal = override.antal !== undefined ? override.antal : v.antal;
+              const vare = findVare(varenr);
+              const aLabel = Number.isInteger(antal) ? `${antal} stk.` : `${antal} m`;
+              t += `    >> ${vare ? vare.beskrivelse : varenr} x ${aLabel} [${varenr}]\n`;
+            });
+          });
+        }
+
+        if (mast.udstyr && mast.udstyr.length > 0) {
+          t += '\nEkstra udstyr:\n';
+          mast.udstyr.forEach(u => {
+            const vn = visVarenr(u.varenr);
+            const erKabel = KABEL_VARENUMRE.includes(u.varenr);
+            const antalLabel = erKabel ? `${u.antal || 1} m` : `${u.antal || 1} stk.`;
+            let line = `  * ${u.type || ''}${u.betegnelse ? ' - ' + u.betegnelse : ''} x ${antalLabel}`;
+            if (vn) line += ` [${vn}]`;
+            if (u.forloengerArm) line += ' (forlaenger arm)';
+            t += line + '\n';
+            autoVarerForUdstyr(u, mast.mastetype).forEach((v, aIdx) => {
+              const override = (u._autoOverrides || {})[aIdx] || {};
+              const varenr = override.varenr || v.varenr;
+              const antal = override.antal !== undefined ? override.antal : v.antal;
+              const vare = findVare(varenr);
+              const aLabel = Number.isInteger(antal) ? `${antal} stk.` : `${antal} m`;
+              t += `    >> ${vare ? vare.beskrivelse : varenr} x ${aLabel} [${varenr}]\n`;
+            });
+          });
+        }
+        t += '\n';
+      });
+    }
+    return t;
+  }
+
+  function generateMarkdown() {
+    const dato = new Date().toISOString().slice(0, 10);
+    const nummer = fullTegningsnr();
+
+    let md = '---\n';
+    md += 'tags:\n  - signalanlæg\n';
+    if (state.nr) md += `anlægsnummer: ${state.nr}\n`;
+    if (state.navn) md += `navn: ${state.navn}\n`;
+    md += `dato: ${dato}\n`;
+    md += `antal_master: ${filtereredeMaster().length}\n`;
+    const totalSignaler = state.master.reduce((sum, m) => sum + m.signaler.length, 0);
+    md += `antal_signaler: ${totalSignaler}\n`;
+    md += '---\n\n';
+
+    const titel = nummer
+      ? `# Anlæg ${nummer}${state.navn ? ' – ' + state.navn : ''}`
+      : `# Anlæg: ${state.navn || '(uden navn)'}`;
+    md += titel + '\n\n## Oversigt\n\n';
+    if (state.nr) md += `**Anlægsnummer:** ${state.nr}\n`;
+    md += `**Dato:** ${dato}\n`;
+    md += `**Antal master:** ${filtereredeMaster().length}\n`;
+    md += `**Antal signaler:** ${totalSignaler}\n\n---\n\n`;
+
+    if (filtereredeMaster().length === 0) {
+      md += '_Ingen master tilføjet endnu._\n';
+    } else {
+      filtereredeMaster().forEach(mast => {
+        const masteVarenr = findMasteVarenr(mast.mastetype);
+        md += `## ${mast.mastId} – ${mast.mastetype}${masteVarenr ? ` \`${masteVarenr}\`` : ''}\n\n`;
+        if (mast.mastetype) md += `**Mastetype:** ${mast.mastetype}${masteVarenr ? ` · \`${masteVarenr}\`` : ''}\n`;
+
+        const mastAutoVarer = autoVarerForMast(mast);
+        if (mastAutoVarer.length > 0) {
+          md += '\n**Auto-tilføjet til mast:**\n';
+          mastAutoVarer.forEach(v => {
+            const vare = findVare(v.varenr);
+            md += `- ↳ ${vare ? vare.beskrivelse : v.varenr} × ${v.antal} stk. · \`${v.varenr}\`\n`;
+          });
+        }
+        md += '\n';
+
+        if (mast.signaler.length === 0) {
+          md += '**Signaler:** _Ingen signaler._\n\n';
+        } else {
+          md += '**Signaler:**\n';
+          mast.signaler.forEach(sig => {
+            const vn = visVarenr(sig.varenr);
+            let line = `- **${sig.betegnelse || '?'}:** ${sig.type}`;
+            if (sig.hojde) line += ` _(${sig.hojde})_`;
+            if (vn) line += ` · \`${vn}\``;
+            if (sig.note) line += ` — _${sig.note}_`;
+            md += line + '\n';
+            autoVarerForSignal(sig).forEach((v, aIdx) => {
+              const override = (sig._autoOverrides || {})[aIdx] || {};
+              const varenr = override.varenr || v.varenr;
+              const antal = override.antal !== undefined ? override.antal : v.antal;
+              const vare = findVare(varenr);
+              const aLabel = Number.isInteger(antal) ? `${antal} stk.` : `${antal} m`;
+              md += `  - ↳ ${vare ? vare.beskrivelse : varenr} × ${aLabel} · \`${varenr}\`\n`;
+            });
+          });
+          md += '\n';
+        }
+
+        if (mast.udstyr && mast.udstyr.length > 0) {
+          md += '**Ekstra udstyr:**\n';
+          mast.udstyr.forEach(u => {
+            const vn = visVarenr(u.varenr);
+            const erKabel = KABEL_VARENUMRE.includes(u.varenr);
+            const antalLabel = erKabel ? `${u.antal || 1} m` : `${u.antal || 1} stk.`;
+            let line = `- ${u.type || ''}${u.betegnelse ? ' – ' + u.betegnelse : ''} × ${antalLabel}`;
+            if (vn) line += ` · \`${vn}\``;
+            if (u.forlængerArm) line += ' _(forlænger arm)_';
+            md += line + '\n';
+            autoVarerForUdstyr(u, mast.mastetype).forEach((v, aIdx) => {
+              const override = (u._autoOverrides || {})[aIdx] || {};
+              const varenr = override.varenr || v.varenr;
+              const antal = override.antal !== undefined ? override.antal : v.antal;
+              const vare = findVare(varenr);
+              const aLabel = Number.isInteger(antal) ? `${antal} stk.` : `${antal} m`;
+              md += `  - ↳ ${vare ? vare.beskrivelse : varenr} × ${aLabel} · \`${varenr}\`\n`;
+            });
+          });
+          md += '\n';
+        }
+      });
+    }
+    return md;
+  }
+
+  function opdaterOutput() {
+    const format = $('format-vaelger').value;
+    $('output').value = format === 'txt' ? generateTekst() : generateMarkdown();
+  }
+
+  function render() {
+    renderMaster();
+    renderMastFilter();
+    opdaterOutput();
+    planAutoGem();
+  }
+
+  // ==============================
+  // Automatiske regler
+  // ==============================
+  const AUTO_REGLER_SIGNAL = [
+    {
+      beskrivelse: 'DSI signal → 1× Konsol opadvendt DSI',
+      matcher: sig => sig.kategori && sig.kategori.includes('DSI') && !(sig.kategori === 'Sunburst DSI' && sig.type && sig.type.includes('4-lys')),
+      varer: [{ varenr: '270-500-3002', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Ercolight 2 punkt 3-felt/2-felt → 2× Støtteholder sort kort',
+      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && !sig.type.includes('1-felt'),
+      varer: [{ varenr: '167-650-0211', antal: 2 }]
+    },
+    {
+      beskrivelse: 'Ercolight 2 punkt 3-felt/2-felt → 2× Flangemøtrik',
+      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && !sig.type.includes('1-felt'),
+      varer: [{ varenr: '270-100-8268', antal: 2 }]
+    },
+    {
+      beskrivelse: 'Ercolight 2 punkt 3-felt/2-felt → 2× Pindbolt',
+      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && !sig.type.includes('1-felt'),
+      varer: [{ varenr: '270-100-1056', antal: 2 }]
+    },
+    {
+      beskrivelse: 'Ercolight 2 punkt 1-felt → 1× Støtteholder sort lang',
+      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && sig.type.includes('1-felt'),
+      varer: [{ varenr: '167-650-0212', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Ercolight 2 punkt 1-felt → 1× Flangemøtrik',
+      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && sig.type.includes('1-felt'),
+      varer: [{ varenr: '270-100-8268', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Ercolight 2 punkt 1-felt → 1× Pindbolt',
+      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && sig.type.includes('1-felt'),
+      varer: [{ varenr: '270-100-1056', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Ercolight 2 punkt 1-felt → 3,5m Lanternekabel 5G1mm Sort',
+      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && sig.type.includes('1-felt'),
+      varer: [{ varenr: '250-100-0362', antal: 3.5 }]
+    },
+    {
+      beskrivelse: 'Lavt signal (ikke 1-felt) → 3,5m Lanternekabel 5G1mm Sort',
+      matcher: sig => sig.hojde === 'Lavt' && !(sig.kategori && sig.kategori.includes('2 punkt') && sig.type && sig.type.includes('1-felt')),
+      varer: [{ varenr: '250-100-0362', antal: 3.5 }]
+    },
+    {
+      beskrivelse: 'Højt signal → 5m Lanternekabel 5G1mm Sort',
+      matcher: sig => sig.hojde === 'Højt',
+      varer: [{ varenr: '250-100-0362', antal: 5 }]
+    },
+    {
+      beskrivelse: 'Lanterne 4-felt polsk pissignal → 2m Lanternekabel 7G1mm Sort',
+      matcher: sig => sig.varenr === '167-250-0501',
+      varer: [{ varenr: '250-100-0365', antal: 2 }]
+    },
+    {
+      beskrivelse: 'Ercolight 1-felt (2 punkt + DSI) → 1× Pil maske grøn',
+      matcher: sig => sig.type && sig.type.includes('1-felt') && sig.kategori && sig.kategori.includes('Ercolight'),
+      varer: [{ varenr: '167-650-0674', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Signal med pilemaske → 2× Rød/gul + 1× Grøn',
+      matcher: sig => sig.pilemaske === true,
+      varer: [
+        { varenr: '167-650-0673', antal: 2 },
+        { varenr: '167-650-0674', antal: 1 },
+      ]
+    },
+  ];
+
+  const AUTO_REGLER_UDSTYR = [
+    {
+      beskrivelse: 'Flir TrafiOne → 8m Kabel Kat 6A',
+      matcher: u => u.varenr === '250-650-0118' || u.varenr === '250-650-0119',
+      varer: [{ varenr: '250-100-1997', antal: 8 }]
+    },
+    {
+      beskrivelse: 'Smartmicro Type 44/45/48 → Kabel UMMR',
+      matcher: u => ['250-650-0164', '250-650-0165', '250-650-0167'].includes(u.varenr),
+      varer: [{ varenr: '250-650-0159', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Smartmicro Type 44/45 → Konsol UMMR 29/44/45',
+      matcher: u => ['250-650-0164', '250-650-0165'].includes(u.varenr),
+      varer: [{ varenr: '250-650-0137', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Smartmicro Type 29/30 → Kabel til radar 10 meter',
+      matcher: u => ['250-650-0160', '250-650-0161'].includes(u.varenr),
+      varer: [{ varenr: '250-650-0141', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Smartmicro Type 29/30 → Konsol UMMR 29/44/45',
+      matcher: u => ['250-650-0160', '250-650-0161'].includes(u.varenr),
+      varer: [{ varenr: '250-650-0137', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Smartmicro Type 48 → Konsol UMMR 42/48',
+      matcher: u => u.varenr === '250-650-0167',
+      varer: [{ varenr: '250-650-0162', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Heimdall radar → 4m Lanternekabel 5G1mm',
+      matcher: u => u.varenr === '167-665-0063' || u.varenr === '167-665-0065',
+      varer: [{ varenr: '250-100-0362', antal: 4 }]
+    },
+    {
+      beskrivelse: 'Vægbeslag DSI → 1× Ophæng Universal DSI',
+      matcher: u => u.varenr === '270-500-3009',
+      varer: [{ varenr: '270-500-3008', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Ophæng Universal DSI → 1× Vægbeslag DSI',
+      matcher: u => u.varenr === '270-500-3008',
+      varer: [{ varenr: '270-500-3009', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Prisma fodgængertryk med klistermærke → Mærkat Tryk for Grønt',
+      matcher: u => u.klistermaerke && u.underkategori === 'Prisma',
+      varer: [{ varenr: '250-650-0050', antal: 1 }]
+    },
+    {
+      beskrivelse: 'RTB fodgængertryk med klistermærke → Makat til fodgængertryk RTB',
+      matcher: u => u.klistermaerke && u.underkategori === 'RTB',
+      varer: [{ varenr: '250-550-0051', antal: 1 }]
+    },
+    {
+      beskrivelse: 'Klemrække → 1× Sejldugspose',
+      matcher: u => ['250-300-1001','250-300-1002','250-300-1003','250-300-1004','250-300-1005','250-300-1007','250-300-1008','250-300-1009'].includes(u.varenr),
+      varer: [{ varenr: '250-300-1100', antal: 1 }]
+    },
+  ];
+
+  // Auto-regler baseret på mastetype
+  const AUTO_REGLER_MAST = [
+    { matcher: m => m.mastetype === 'Lav DSI mast',       varer: [{ varenr: '270-500-3005', antal: 1 }] },
+    { matcher: m => m.mastetype === 'Høj DSI mast',       varer: [{ varenr: '270-500-3005', antal: 1 }, { varenr: '270-500-3006', antal: 1 }] },
+    { matcher: m => m.mastetype === 'DSI Galgemast cykel', varer: [{ varenr: '270-500-3006', antal: 1 }] },
+    { matcher: m => m.mastetype === 'DSI Galgemast høj',   varer: [{ varenr: '270-500-3006', antal: 1 }] },
+  ];
+
+  // Bagudkompatibilitet
+  const AUTO_REGLER = AUTO_REGLER_SIGNAL;
+
+  // Beregn automatiske varer for et enkelt signal
+  function autoVarerForSignal(sig) {
+    const result = [];
+    AUTO_REGLER_SIGNAL.forEach(regel => {
+      if (regel.matcher(sig)) regel.varer.forEach(v => result.push({ ...v }));
+    });
+    return result;
+  }
+
+  // Beregn automatiske varer for et enkelt udstyr (med mastetype og arm-info)
+  function autoVarerForUdstyr(u, mastetype) {
+    const result = [];
+    AUTO_REGLER_UDSTYR.forEach(regel => {
+      if (regel.matcher(u)) regel.varer.forEach(v => result.push({ ...v }));
+    });
+
+    // Spændbånd baseret på radar/kamera + mastetype
+    if (RADAR_VARENUMRE.includes(u.varenr)) {
+      if (u.forlængerArm) {
+        // På forlænger arm
+        const svarenr = FLIR_VARENUMRE.includes(u.varenr) ? SPAENDBAAND_ARM_FLIR : SPAENDBAAND_ARM_DEFAULT;
+        result.push({ varenr: svarenr, antal: 2 });
+      } else if (mastetype) {
+        // Direkte på mast
+        const svarenr = SPAENDBAAND_PR_MAST[mastetype];
+        if (svarenr) result.push({ varenr: svarenr, antal: 2 });
+      }
+    }
+
+    return result;
+  }
+
+  // Find kategorinavn for et varenr
+  function findVareKategoriNavn(varenr) {
+    for (const kat of VAREKATALOG) {
+      if (kat.underkategorier) {
+        for (const under of kat.underkategorier) {
+          if (under.varer.find(v => v.varenr === varenr)) return kat.kategori;
+        }
+      } else if (kat.varer) {
+        if (kat.varer.find(v => v.varenr === varenr)) return kat.kategori;
+      }
+    }
+    return null;
+  }
+
+  // Find alle varer i samme kategori som et givet varenr (til dropdown)
+  function findVareKategoriVarer(varenr) {
+    for (const kat of VAREKATALOG) {
+      if (kat.underkategorier) {
+        for (const under of kat.underkategorier) {
+          if (under.varer.find(v => v.varenr === varenr)) return under.varer;
+        }
+      } else if (kat.varer) {
+        if (kat.varer.find(v => v.varenr === varenr)) return kat.varer;
+      }
+    }
+    return null;
+  }
+
+  // Byg varenr dropdown HTML for en given vare (fra samme kategori)
+  function bygVareDropdownHtml(varenr, selected) {
+    const varer = findVareKategoriVarer(varenr);
+    if (!varer) return `<input type="text" value="${escapeHtml(selected)}" style="width:150px;font-size:13px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-2);color:var(--text)" />`;
+    return `<select style="font-size:13px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-2);color:var(--text);min-width:180px">
+      ${varer.filter(v => !v.varenr.startsWith('INTERN-')).map(v =>
+        `<option value="${escapeHtml(v.varenr)}"${v.varenr === selected ? ' selected' : ''}>${escapeHtml(v.beskrivelse)}</option>`
+      ).join('')}
+    </select>`;
+  }
+
+  // Byg antal dropdown (0.5 til 20 med 0.5 trin, plus heltal op til 20)
+  function bygAntalDropdownHtml(selected) {
+    const opts = [];
+    for (let i = 0.5; i <= 20; i += 0.5) {
+      const label = Number.isInteger(i) ? `${i}` : `${i}`;
+      opts.push(`<option value="${i}"${i === selected ? ' selected' : ''}>${label}</option>`);
+    }
+    return `<select style="width:80px;font-size:13px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-2);color:var(--text)">${opts.join('')}</select>`;
+  }
+
+  function autoVarerForMast(mast) {
+    const result = [];
+    AUTO_REGLER_MAST.forEach(regel => {
+      if (regel.matcher(mast)) regel.varer.forEach(v => result.push({ ...v }));
+    });
+    return result;
+  }
+
+  // Beregn stykliste pr. mast inkl. automatiske varer
+  function beregnStyklistePrMast(mast) {
+    const tæller = {};
+    // Mastetype
+    const masteVarenr = findMasteVarenr(mast.mastetype);
+    if (masteVarenr) tæller[masteVarenr] = (tæller[masteVarenr] || 0) + 1;
+    // Auto-varer fra mastetype (hætter osv.)
+    autoVarerForMast(mast).forEach(v => {
+      tæller[v.varenr] = (tæller[v.varenr] || 0) + v.antal;
+    });
+    // Manuelt tilføjet udstyr + auto-varer for udstyr
+    let armTilfoejt = false;
+    (mast.udstyr || []).forEach(u => {
+      if (u.varenr) {
+        const antal = parseFloat(u.antal) || 1;
+        tæller[u.varenr] = (tæller[u.varenr] || 0) + antal;
+      }
+      // Forlænger arm — max 1 pr. mast
+      if (u.forlængerArm && RADAR_VARENUMRE.includes(u.varenr) && !armTilfoejt) {
+        tæller['250-650-0148'] = (tæller['250-650-0148'] || 0) + 1;
+        armTilfoejt = true;
+      }
+      const udstyrAntal = parseFloat(u.antal) || 1;
+      autoVarerForUdstyr(u, mast.mastetype).forEach((v, aIdx) => {
+        const override = (u._autoOverrides || {})[aIdx] || {};
+        if (override._slettet) return;
+        const varenr = override.varenr || v.varenr;
+        const autoAntal = override.antal !== undefined ? override.antal : v.antal;
+        tæller[varenr] = (tæller[varenr] || 0) + (autoAntal * udstyrAntal);
+      });
+    });
+    // Automatiske varer fra signaler + selve lanterner
+    (mast.signaler || []).forEach(sig => {
+      if (sig.varenr) tæller[sig.varenr] = (tæller[sig.varenr] || 0) + 1;
+      autoVarerForSignal(sig).forEach((v, aIdx) => {
+        const override = (sig._autoOverrides || {})[aIdx] || {};
+        if (override._slettet) return;
+        const varenr = override.varenr || v.varenr;
+        const antal = override.antal !== undefined ? override.antal : v.antal;
+        tæller[varenr] = (tæller[varenr] || 0) + antal;
+      });
+    });
+    return tæller;
+  }
+
+  // Byg signal-sektion fra total (TYPE: nøgler)
+  function signalSektionHtml(total) {
+    const signaler = Object.entries(total)
+      .filter(([k]) => k.startsWith('TYPE:'))
+      .map(([k, antal]) => ({ type: k.replace('TYPE:', ''), antal }))
+      .sort((a, b) => a.type.localeCompare(b.type));
+    if (signaler.length === 0) return '';
+    return `
+      <div class="stykliste-gruppe">
+        <div class="stykliste-kat-label">Signaler</div>
+        ${signaler.map(s => `<div class="stykliste-row">
+          <span class="stykliste-varenr">—</span>
+          <span class="stykliste-beskrivelse">${escapeHtml(s.type)}</span>
+          <span class="stykliste-antal">${s.antal} stk.</span>
+        </div>`).join('')}
+      </div>`;
+  }
+
+  function signalSektionTekst(total) {
+    const signaler = Object.entries(total)
+      .filter(([k]) => k.startsWith('TYPE:'))
+      .map(([k, antal]) => ({ type: k.replace('TYPE:', ''), antal }))
+      .sort((a, b) => a.type.localeCompare(b.type));
+    if (signaler.length === 0) return '';
+    let t = 'Signaler:\n';
+    signaler.forEach(s => {
+      t += `  ${'—'.padEnd(18)} ${s.type} (${s.antal} stk.)\n`;
+    });
+    return t + '\n';
+  }
+
+  function signalSektionMd(total) {
+    const signaler = Object.entries(total)
+      .filter(([k]) => k.startsWith('TYPE:'))
+      .map(([k, antal]) => ({ type: k.replace('TYPE:', ''), antal }))
+      .sort((a, b) => a.type.localeCompare(b.type));
+    if (signaler.length === 0) return '';
+    let md = '### Signaler\n\n';
+    signaler.forEach(s => md += `- — ${s.type} — **${s.antal} stk.**\n`);
+    return md + '\n';
+  }
+
+  // Filtrer total for visning (fjern TYPE: nøgler fra varekatalog-loop)
+  function totalUdenSignaler(total) {
+    return Object.fromEntries(Object.entries(total).filter(([k]) => !k.startsWith('TYPE:')));
+  }
+
+  function renderStykliste() {
+    const container = $('stykliste-indhold');
+    if (!container) return;
+
+    if (state.master.length === 0) {
+      container.innerHTML = '<p class="empty-state">Ingen master tilføjet endnu.</p>';
+      return;
+    }
+
+    // Samlet tæller på tværs af alle master
+    const total = {};
+    state.master.forEach(mast => {
+      Object.entries(beregnStyklistePrMast(mast)).forEach(([varenr, antal]) => {
+        total[varenr] = (total[varenr] || 0) + antal;
+      });
+    });
+
+    if (Object.keys(total).length === 0) {
+      container.innerHTML = '<p class="empty-state">Ingen varer tilføjet endnu.</p>';
+      return;
+    }
+
+    // Vis pr. kategori — INTERN varer vises med — som varenr
+    const grupperHtml = VAREKATALOG.map(kat => {
+      const alleVarer = kat.underkategorier
+        ? kat.underkategorier.flatMap(u => u.varer)
+        : (kat.varer || []);
+      const rækker = alleVarer.filter(v => total[v.varenr]);
+      if (rækker.length === 0) return '';
+      return `
+        <div class="stykliste-gruppe">
+          <div class="stykliste-kat-label">${escapeHtml(kat.kategori)}</div>
+          ${rækker.map(v => {
+            const erKabel = KABEL_VARENUMRE.includes(v.varenr);
+            const antalVis = erKabel ? total[v.varenr] + ' m' : total[v.varenr] + ' stk.';
+            return `<div class="stykliste-row">
+              <span class="stykliste-varenr">${escapeHtml(visVarenr(v.varenr) || '—')}</span>
+              <span class="stykliste-beskrivelse">${escapeHtml(v.beskrivelse)}</span>
+              <span class="stykliste-antal">${antalVis}</span>
+            </div>`;
+          }).join('')}
+        </div>`;
+    }).join('');
+
+    container.innerHTML = grupperHtml || '<p class="empty-state">Ingen kendte varer.</p>';
+  }
+
+  function generateStyklisteMarkdown() {
+    const dato = new Date().toISOString().slice(0, 10);
+    const nummer = fullTegningsnr();
+    const titel = nummer
+      ? `Stykliste – Anlæg ${nummer}${state.navn ? ' – ' + state.navn : ''}`
+      : `Stykliste – ${state.navn || 'Anlæg'}`;
+    let md = `# ${titel}\n\n`;
+    md += `**Dato:** ${dato}  **Master:** ${state.master.length}\n\n`;
+
+    const total = {};
+    state.master.forEach(mast => {
+      Object.entries(beregnStyklistePrMast(mast)).forEach(([varenr, antal]) => {
+        total[varenr] = (total[varenr] || 0) + antal;
+      });
+    });
+
+    if (Object.keys(total).length === 0) { md += '_Ingen varer._\n'; return md; }
+
+    // DEL 1: Kategorier med varer
+    VAREKATALOG.forEach(kat => {
+      const alleVarer = kat.underkategorier
+        ? kat.underkategorier.flatMap(u => u.varer)
+        : (kat.varer || []);
+      const varer = alleVarer.filter(v => total[v.varenr]);
+      if (varer.length === 0) return;
+      md += `### ${kat.kategori}\n\n`;
+      varer.forEach(v => {
+        const erKabel = KABEL_VARENUMRE.includes(v.varenr);
+        const antalVis = erKabel ? total[v.varenr] + ' m' : total[v.varenr] + ' stk.';
+        const vn = visVarenr(v.varenr) || '—';
+        md += `- \`${vn}\` ${v.beskrivelse} — **${antalVis}**\n`;
+      });
+      md += '\n';
+    });
+
+    // DEL 2: Samlet tabel
+    md += '---\n\n## Samlet oversigt\n\n';
+    md += '| Varenr. | Beskrivelse | Antal |\n';
+    md += '| :------ | :---------- | ----: |\n';
+    VAREKATALOG.forEach(kat => {
+      const alleVarer = kat.underkategorier
+        ? kat.underkategorier.flatMap(u => u.varer)
+        : (kat.varer || []);
+      alleVarer.filter(v => total[v.varenr]).forEach(v => {
+        const erKabel = KABEL_VARENUMRE.includes(v.varenr);
+        const antalVis = erKabel ? total[v.varenr] + ' m' : total[v.varenr] + ' stk.';
+        md += `| \`${visVarenr(v.varenr) || '—'}\` | ${v.beskrivelse} | **${antalVis}** |\n`;
+      });
+    });
+
+    return md;
+  }
+
+  // ==============================
+  // LocalStorage
+  // ==============================
+  function gemteNoegler() {
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(STORAGE_PREFIX) && !k.includes('github')) keys.push(k);
+    }
+    return keys.sort();
+  }
+
+  function opdaterGemtListe() {
+    const sel = $('gemte-anlaeg');
+    sel.innerHTML = '<option value="">— Vælg gemt anlæg —</option>';
+    gemteNoegler().forEach(k => {
+      const navn = k.replace(STORAGE_PREFIX, '');
+      const opt = document.createElement('option');
+      opt.value = k;
+      opt.textContent = navn;
+      sel.appendChild(opt);
+    });
+  }
+
+  function gemAnlaeg() {
+    const idDel = state.nr.trim() || state.navn.trim();
+    if (!idDel) {
+      visBesked('Giv anlægget et nummer eller navn først', 'danger');
+      return;
+    }
+    const key = STORAGE_PREFIX + idDel.replace(/[^a-zA-Z0-9æøåÆØÅ_-]/g, '_');
+    try {
+      localStorage.setItem(key, JSON.stringify(state));
+      opdaterGemtListe();
+      $('gemte-anlaeg').value = key;
+      visBesked('✓ Anlæg gemt');
+      // Gem i Supabase
+      supabaseGemAnlaeg(key, state).catch(() => {});
+      // Auto-push til GitHub hvis konfigureret
+      const cfg = githubIndstillinger();
+      if (cfg && cfg.token && cfg.owner && cfg.repo) {
+        githubPushEnkelt(key).then(() => {
+          visBesked('✓ Gemt og synkroniseret til GitHub');
+        }).catch(() => {
+          // Stille fejl — lokal gem er OK
+        });
+      }
+    } catch (err) {
+      visBesked('Kunne ikke gemme: ' + err.message, 'danger');
+    }
+  }
+
+  function omdoebAnlaeg(key) {
+    if (!key) { visBesked('Vælg et anlæg først', 'danger'); return; }
+    const gammeltNavn = key.replace(STORAGE_PREFIX, '');
+    const container = $('omdoeb-container');
+    if (container) {
+      container.style.display = '';
+      const input = $('omdoeb-input');
+      if (input) { input.value = gammeltNavn; input.focus(); input.select(); }
+    }
+  }
+
+  function bekraeftOmdoeb() {
+    const key = $('gemte-anlaeg').value;
+    if (!key) return;
+    const nytNavn = $('omdoeb-input').value.trim();
+    if (!nytNavn) return;
+    const nyKey = STORAGE_PREFIX + nytNavn.replace(/[^a-zA-Z0-9æøåÆØÅ_-]/g, '_');
+    const data = localStorage.getItem(key);
+    if (!data) return;
+    localStorage.setItem(nyKey, data);
+    localStorage.removeItem(key);
+    $('omdoeb-container').style.display = 'none';
+    opdaterGemtListe();
+    $('gemte-anlaeg').value = nyKey;
+    visBesked(`✓ Omdøbt til ${nytNavn}`);
+    const cfg = githubIndstillinger();
+    if (cfg && cfg.token && cfg.owner && cfg.repo) {
+      // Push nyt navn og slet gammelt på GitHub
+      const gammeltNavn = key.replace(STORAGE_PREFIX, '');
+      githubPushEnkelt(nyKey).catch(() => {});
+      githubSletFil(gammeltNavn, cfg).catch(() => {});
+    }
+  }
+
+  async function githubSletFil(navn, cfg) {
+    const url = await githubApiUrl(cfg, `anlaeg/${navn}.json`);
+    const tjek = await fetch(url, {
+      headers: { 'Authorization': `token ${cfg.token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (!tjek.ok) return;
+    const fil = await tjek.json();
+    await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `token ${cfg.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message: `Slet anlæg ${navn}`, sha: fil.sha })
+    });
+  }
+
+  function indlaesAnlaeg(key) {
+    if (!key) return;
+    try {
+      const rawData = localStorage.getItem(key);
+      if (!rawData) return;
+      const data = JSON.parse(rawData);
+      state = {
+        nr: data.nr || '',
+        navn: data.navn || '',
+        master: data.master || []
+      };
+      // Migrering: ældre data kunne have udstyr som string
+      state.master.forEach(m => {
+        if (typeof m.udstyr === 'string') {
+          m.udstyr = m.udstyr ? [{ type: 'Andet', betegnelse: m.udstyr }] : [];
+        } else if (!Array.isArray(m.udstyr)) {
+          m.udstyr = [];
+        }
+      });
+      opdaterFormFelter();
+      // Kollaps alle master ved indlæsning
+      collapsedMaster.clear();
+      state.master.forEach((_, i) => collapsedMaster.add(i));
+      render();
+      visBesked('✓ Anlæg indlæst');
+    } catch (err) {
+      visBesked('Kunne ikke indlæse: ' + err.message, 'danger');
+    }
+  }
+
+  function sletAnlaeg(key) {
+    if (!key) return;
+    if (!confirm('Slet det gemte anlæg permanent?')) return;
+    const navn = key.replace(STORAGE_PREFIX, '');
+    localStorage.removeItem(key);
+    opdaterGemtListe();
+    visBesked('Anlæg slettet');
+    // Slet i Supabase
+    supabaseSletAnlaeg(navn).catch(() => {});
+    const cfg = githubIndstillinger();
+    if (cfg && cfg.token && cfg.owner && cfg.repo) {
+      githubSletFil(navn, cfg).catch(() => {});
+    }
+  }
+
+  function eksporterJson() {
+    const alle = {};
+    gemteNoegler().forEach(k => {
+      alle[k.replace(STORAGE_PREFIX, '')] = JSON.parse(localStorage.getItem(k));
+    });
+    const blob = new Blob([JSON.stringify(alle, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'signalanlaeg-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    visBesked('✓ Alle anlæg eksporteret');
+  }
+
+  function eksporterJsonEnkelt() {
+    const idDel = state.nr.trim() || state.navn.trim();
+    if (!idDel) { visBesked('Udfyld anlægsnummer eller navn først', 'danger'); return; }
+    const navn = idDel.replace(/[^a-zA-Z0-9æøåÆØÅ_-]/g, '_');
+    const enkelt = {};
+    enkelt[navn] = state;
+    const blob = new Blob([JSON.stringify(enkelt, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `signalanlaeg-${navn}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    visBesked(`✓ Anlæg "${idDel}" eksporteret`);
+  }
+
+  function importerJson(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        let antal = 0;
+        Object.entries(data).forEach(([navn, anlaeg]) => {
+          const key = STORAGE_PREFIX + navn;
+          localStorage.setItem(key, JSON.stringify(anlaeg));
+          antal++;
+        });
+        opdaterGemtListe();
+        visBesked(`✓ ${antal} anlæg importeret`);
+      } catch (err) {
+        visBesked('Ugyldig JSON-fil: ' + err.message, 'danger');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ==============================
+  // Form-håndtering
+  // ==============================
+  function opdaterFormFelter() {
+    $('anlaeg-nr').value = state.nr;
+    $('anlaeg-navn').value = state.navn;
+  }
+
+  function nytAnlaeg() {
+    if (state.master.length > 0 && !confirm('Start nyt anlæg? Nuværende data slettes (medmindre det er gemt).')) return;
+    state = tomtAnlaeg();
+    opdaterFormFelter();
+    render();
+  }
+
+  function naturalSort(a, b) {
+    return a.mastId.localeCompare(b.mastId, undefined, { numeric: true, sensitivity: 'base' });
+  }
+
+  function tilfoejMast() {
+    const mastId = $('ny-mast-id').value.trim() || `S${state.master.length + 1}`;
+    state.master.push({
+      mastId: mastId,
+      mastetype: $('ny-mastetype').value,
+      udstyr: [],
+      signaler: []
+    });
+    state.master.sort(naturalSort);
+    $('ny-mast-id').value = '';
+    render();
+  }
+
+  // ==============================
+  // Event handlers
+  // ==============================
+  // ==============================
+  // GitHub Sync
+  // ==============================
+  const GITHUB_STORAGE_KEY = 'signalanlaeg:github:config';
+
+  function githubIndstillinger() {
+    try { return JSON.parse(localStorage.getItem(GITHUB_STORAGE_KEY)) || {}; } catch { return {}; }
+  }
+
+  function gemGithubIndstillinger(token, owner, repo) {
+    localStorage.setItem(GITHUB_STORAGE_KEY, JSON.stringify({ token, owner, repo }));
+  }
+
+  function indlaesGithubIndstillinger() {
+    const cfg = githubIndstillinger();
+    if ($('github-token')) $('github-token').value = cfg.token || '';
+    if ($('github-owner')) $('github-owner').value = cfg.owner || '';
+    if ($('github-repo'))  $('github-repo').value  = cfg.repo  || '';
+    opdaterGithubBadge(cfg);
+    // Vis badge i header selv om sektionen er lukket
+    if (cfg && cfg.token && cfg.owner && cfg.repo) {
+      const badge = $('github-status-badge');
+      if (badge) { badge.textContent = `${cfg.owner}/${cfg.repo}`; badge.className = 'badge badge-auto'; }
+    }
+  }
+
+  function opdaterGithubBadge(cfg) {
+    const badge = $('github-status-badge');
+    if (!badge) return;
+    if (cfg && cfg.token && cfg.owner && cfg.repo) {
+      badge.textContent = `${cfg.owner}/${cfg.repo}`;
+      badge.className = 'badge badge-auto';
+    } else {
+      badge.textContent = 'Ikke konfigureret';
+      badge.className = 'badge badge-neutral';
+    }
+  }
+
+  function githubVisBesked(tekst, fejl) {
+    const el = $('github-besked');
+    if (!el) return;
+    el.textContent = tekst;
+    el.style.color = fejl ? 'var(--danger)' : 'var(--success)';
+  }
+
+  async function githubApiUrl(cfg, sti) {
+    return `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${sti}`;
+  }
+
+  function githubCfgFraFelter() {
+    const token = $('github-token') ? $('github-token').value.trim() : '';
+    const owner = $('github-owner') ? $('github-owner').value.trim() : '';
+    const repo  = $('github-repo')  ? $('github-repo').value.trim()  : '';
+    // Auto-gem hvis udfyldt
+    if (token && owner && repo) gemGithubIndstillinger(token, owner, repo);
+    return { token, owner, repo };
+  }
+
+  async function githubPushEnkelt(key) {
+    const cfg = githubIndstillinger();
+    if (!cfg.token || !cfg.owner || !cfg.repo) return;
+    const data = localStorage.getItem(key);
+    if (!data) return;
+    const navn = key.replace(STORAGE_PREFIX, '');
+    const filnavn = `anlaeg/${navn}.json`;
+    const url = await githubApiUrl(cfg, filnavn);
+    const indhold = btoa(unescape(encodeURIComponent(data)));
+    let sha = undefined;
+    const tjek = await fetch(url, {
+      headers: { 'Authorization': `token ${cfg.token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (tjek.ok) { const tj = await tjek.json(); sha = tj.sha; }
+    const body = { message: `Opdater anlæg ${navn}`, content: indhold };
+    if (sha) body.sha = sha;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${cfg.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`${res.status}`);
+  }
+
+  async function githubHent() {
+    const cfg = githubCfgFraFelter();
+    if (!cfg.token || !cfg.owner || !cfg.repo) {
+      githubVisBesked('Udfyld token, bruger og repo først', true); return;
+    }
+    githubVisBesked('Henter fra GitHub...');
+    try {
+      const url = await githubApiUrl(cfg, 'anlaeg');
+      const res = await fetch(url, {
+        headers: { 'Authorization': `token ${cfg.token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (res.status === 404) { githubVisBesked('Ingen anlæg fundet på GitHub endnu'); return; }
+      if (!res.ok) throw new Error(`GitHub fejl: ${res.status}`);
+      const filer = await res.json();
+      let hentet = 0;
+      for (const fil of filer) {
+        if (!fil.name.endsWith('.json')) continue;
+        if (fil.name.includes('github')) continue; // spring config over
+        const filRes = await fetch(fil.download_url);
+        const data = await filRes.json();
+        const key = STORAGE_PREFIX + fil.name.replace('.json', '');
+        localStorage.setItem(key, JSON.stringify(data));
+        hentet++;
+      }
+      opdaterGemtListe();
+      githubVisBesked(`✓ Hentet ${hentet} anlæg fra GitHub`);
+    } catch (err) {
+      githubVisBesked(`Fejl: ${err.message}`, true);
+    }
+  }
+
+  async function githubPush() {
+    const cfg = githubCfgFraFelter();
+    if (!cfg.token || !cfg.owner || !cfg.repo) {
+      githubVisBesked('Udfyld token, bruger og repo først', true); return;
+    }
+    const noegler = gemteNoegler().filter(k => !k.includes('github'));
+    if (noegler.length === 0) { githubVisBesked('Ingen gemte anlæg at pushe', true); return; }
+    githubVisBesked(`Pusher ${noegler.length} anlæg til GitHub...`);
+    try {
+      let pushed = 0;
+      for (const key of noegler) {
+        const data = localStorage.getItem(key);
+        if (!data) continue;
+        const navn = key.replace(STORAGE_PREFIX, '');
+        const filnavn = `anlaeg/${navn}.json`;
+        const url = await githubApiUrl(cfg, filnavn);
+        const indhold = btoa(unescape(encodeURIComponent(data)));
+        // Tjek om fil eksisterer for at få SHA
+        let sha = undefined;
+        const tjek = await fetch(url, {
+          headers: { 'Authorization': `token ${cfg.token}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (tjek.ok) { const tj = await tjek.json(); sha = tj.sha; }
+        const body = { message: `Opdater anlæg ${navn}`, content: indhold };
+        if (sha) body.sha = sha;
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${cfg.token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(`GitHub fejl ved ${navn}: ${res.status}`);
+        pushed++;
+      }
+      githubVisBesked(`✓ Pushede ${pushed} anlæg til GitHub`);
+    } catch (err) {
+      githubVisBesked(`Fejl: ${err.message}`, true);
+    }
+  }
+
+  function tilkoblEvents() {
+    $('anlaeg-nr').addEventListener('input', e => { state.nr = e.target.value; opdaterOutput(); planAutoGem(); });
+    $('anlaeg-navn').addEventListener('input', e => { state.navn = e.target.value; opdaterOutput(); planAutoGem(); });
+
+    $('nyt-anlaeg-btn').addEventListener('click', nytAnlaeg);
+    $('tilfoej-mast-btn').addEventListener('click', tilfoejMast);
+
+    $('gem-btn').addEventListener('click', gemAnlaeg);
+    $('indlaes-btn').addEventListener('click', () => indlaesAnlaeg($('gemte-anlaeg').value));
+    $('omdoeb-btn').addEventListener('click', () => omdoebAnlaeg($('gemte-anlaeg').value));
+
+    $('export-json-btn').addEventListener('click', eksporterJson);
+    $('export-json-enkelt-btn') && $('export-json-enkelt-btn').addEventListener('click', eksporterJsonEnkelt);
+    $('import-json-input').addEventListener('change', e => {
+      if (e.target.files[0]) importerJson(e.target.files[0]);
+      e.target.value = '';
+    });
+
+    // GitHub Sync
+    $('toggle-github-btn') && $('toggle-github-btn').addEventListener('click', () => {
+      const indhold = $('github-indhold');
+      const btn = $('toggle-github-btn');
+      const skjult = indhold.style.display === 'none';
+      indhold.style.display = skjult ? '' : 'none';
+      btn.textContent = skjult ? '▾' : '▸';
+    });
+    $('github-gem-indst-btn') && $('github-gem-indst-btn').addEventListener('click', () => {
+      const token = $('github-token').value.trim();
+      const owner = $('github-owner').value.trim();
+      const repo  = $('github-repo').value.trim();
+      if (!token || !owner || !repo) { githubVisBesked('Udfyld alle 3 felter', true); return; }
+      gemGithubIndstillinger(token, owner, repo);
+      opdaterGithubBadge({ token, owner, repo });
+      githubVisBesked('✓ Indstillinger gemt');
+    });
+    $('github-hent-btn') && $('github-hent-btn').addEventListener('click', githubHent);
+    $('github-push-btn') && $('github-push-btn').addEventListener('click', githubPush);
+    indlaesGithubIndstillinger();
+    $('filter-alle-btn') && $('filter-alle-btn').addEventListener('click', () => {
+      mastFilter = new Set(state.master.map(m => m.mastId));
+      renderMastFilter();
+      opdaterOutput();
+    });
+    $('filter-ingen-btn') && $('filter-ingen-btn').addEventListener('click', () => {
+      mastFilter = new Set();
+      renderMastFilter();
+      opdaterOutput();
+    });
+
+    // Toggle output
+    $('toggle-output-btn').addEventListener('click', () => {
+      const indhold = $('output-indhold');
+      const controls = $('output-controls');
+      const btn = $('toggle-output-btn');
+      const skjult = indhold.style.display === 'none';
+      indhold.style.display = skjult ? '' : 'none';
+      if (controls) controls.style.display = skjult ? '' : 'none';
+      btn.textContent = skjult ? '▾' : '▸';
+    });
+
+    $('format-vaelger').addEventListener('change', opdaterOutput);
+    $('kopier-btn').addEventListener('click', kopierOutput);
+    $('download-btn').addEventListener('click', downloadOutput);
+    $('download-stykliste-btn').addEventListener('click', downloadStykliste);
+
+    // Event-delegation på mast-liste
+    $('master-liste').addEventListener('click', handleMasterKlik);
+    $('master-liste').addEventListener('change', handleMasterChange);
+  }
+
+  function handleMasterKlik(e) {
+    const t = e.target.closest('[data-action]');
+    if (!t) return;
+    const action = t.dataset.action;
+    if (!action) return;
+
+    const mIdx = parseInt(t.dataset.mast);
+
+    if (action === 'rediger-mast') {
+      state.master[mIdx]._redigerer = true;
+      render();
+    } else if (action === 'annuller-mast') {
+      delete state.master[mIdx]._redigerer;
+      render();
+    } else if (action === 'gem-mast') {
+      const card = t.closest('.mast-card');
+      const idInput = card.querySelector('[data-field="mast-id-edit"]');
+      const typeSelect = card.querySelector('[data-field="mastetype-edit"]');
+      if (idInput && idInput.value.trim()) state.master[mIdx].mastId = idInput.value.trim();
+      if (typeSelect) state.master[mIdx].mastetype = typeSelect.value;
+      delete state.master[mIdx]._redigerer;
+      state.master.sort(naturalSort);
+      render();
+    } else if (action === 'toggle-sig-section') {
+      const card = t.closest('.mast-card');
+      const body = card.querySelector('.sig-section-body');
+      const arrow = card.querySelector('.mast-section-toggle[data-action="toggle-sig-section"] .btn-collapse');
+      const open = body.style.display !== 'none';
+      body.style.display = open ? 'none' : '';
+      if (arrow) arrow.textContent = open ? '▸' : '▾';
+      const mIdx2 = parseInt(t.dataset.mast);
+      if (open) openSigSections.delete(mIdx2); else openSigSections.add(mIdx2);
+    } else if (action === 'toggle-udstyr-section') {
+      const card = t.closest('.mast-card');
+      const body = card.querySelector('.udstyr-section-body');
+      const arrow = card.querySelector('.mast-section-toggle[data-action="toggle-udstyr-section"] .btn-collapse');
+      const open = body.style.display !== 'none';
+      body.style.display = open ? 'none' : '';
+      if (arrow) arrow.textContent = open ? '▸' : '▾';
+      const mIdx2 = parseInt(t.dataset.mast);
+      if (open) openUdstyrSections.delete(mIdx2); else openUdstyrSections.add(mIdx2);
+    } else if (action === 'toggle-mast') {
+      const card = t.closest('.mast-card');
+      const body = card.querySelector('.mast-body');
+      const summary = card.querySelector('.mast-summary');
+      const collapsed = card.dataset.collapsed === 'true';
+      const mIdx2 = parseInt(t.dataset.mast);
+      if (collapsed) {
+        body.style.display = '';
+        summary.style.display = 'none';
+        t.textContent = '▾';
+        card.dataset.collapsed = 'false';
+        collapsedMaster.delete(mIdx2);
+      } else {
+        body.style.display = 'none';
+        summary.style.display = '';
+        t.textContent = '▸';
+        card.dataset.collapsed = 'true';
+        collapsedMaster.add(mIdx2);
+      }
+    } else if (action === 'del-mast') {
+      if (confirm(`Slet ${state.master[mIdx].mastId} og alle dens signaler?`)) {
+        state.master.splice(mIdx, 1);
+        // Opdater kollaps-indeks efter sletning
+        const nyCollapsed = new Set();
+        collapsedMaster.forEach(i => { if (i < mIdx) nyCollapsed.add(i); else if (i > mIdx) nyCollapsed.add(i - 1); });
+        collapsedMaster.clear(); nyCollapsed.forEach(i => collapsedMaster.add(i));
+        const nySig = new Set();
+        openSigSections.forEach(i => { if (i < mIdx) nySig.add(i); else if (i > mIdx) nySig.add(i - 1); });
+        openSigSections.clear(); nySig.forEach(i => openSigSections.add(i));
+        const nyUdstyr = new Set();
+        openUdstyrSections.forEach(i => { if (i < mIdx) nyUdstyr.add(i); else if (i > mIdx) nyUdstyr.add(i - 1); });
+        openUdstyrSections.clear(); nyUdstyr.forEach(i => openUdstyrSections.add(i));
+        render();
+      }
+    } else if (action === 'del-udstyr') {
+      const uIdx = parseInt(t.dataset.udstyr);
+      state.master[mIdx].udstyr.splice(uIdx, 1);
+      render();
+    } else if (action === 'slet-auto-sig') {
+      const sIdx = parseInt(t.dataset.sig);
+      const aIdx = parseInt(t.dataset.auto);
+      const sig = state.master[mIdx].signaler[sIdx];
+      if (!sig._autoOverrides) sig._autoOverrides = {};
+      sig._autoOverrides[aIdx] = { _slettet: true };
+      render();
+    } else if (action === 'slet-auto-udstyr') {
+      const uIdx = parseInt(t.dataset.udstyr);
+      const aIdx = parseInt(t.dataset.auto);
+      const u = state.master[mIdx].udstyr[uIdx];
+      if (!u._autoOverrides) u._autoOverrides = {};
+      u._autoOverrides[aIdx] = { _slettet: true };
+      render();
+    } else if (action === 'rediger-auto-sig') {
+      const sIdx = parseInt(t.dataset.sig);
+      const aIdx = parseInt(t.dataset.auto);
+      const sig = state.master[mIdx].signaler[sIdx];
+      if (!sig._autoOverrides) sig._autoOverrides = {};
+      if (!sig._autoOverrides[aIdx]) sig._autoOverrides[aIdx] = {};
+      sig._autoOverrides[aIdx]._redigerer = true;
+      render();
+    } else if (action === 'annuller-auto-sig') {
+      const sIdx = parseInt(t.dataset.sig);
+      const aIdx = parseInt(t.dataset.auto);
+      const sig = state.master[mIdx].signaler[sIdx];
+      if (sig._autoOverrides && sig._autoOverrides[aIdx]) delete sig._autoOverrides[aIdx]._redigerer;
+      render();
+    } else if (action === 'gem-auto-sig') {
+      const sIdx = parseInt(t.dataset.sig);
+      const aIdx = parseInt(t.dataset.auto);
+      const antalWrap = document.getElementById(`auto-sig-antal-wrap-${mIdx}-${sIdx}-${aIdx}`);
+      const varenrWrap = document.getElementById(`auto-sig-varenr-wrap-${mIdx}-${sIdx}-${aIdx}`);
+      const antalEl = antalWrap ? antalWrap.querySelector('select') : null;
+      const varenrEl = varenrWrap ? (varenrWrap.querySelector('select') || varenrWrap.querySelector('input')) : null;
+      const sig = state.master[mIdx].signaler[sIdx];
+      if (!sig._autoOverrides) sig._autoOverrides = {};
+      sig._autoOverrides[aIdx] = {
+        antal: antalEl ? parseFloat(antalEl.value) : undefined,
+        varenr: varenrEl && varenrEl.value.trim() ? varenrEl.value.trim() : undefined,
+      };
+      render();
+    } else if (action === 'rediger-auto-udstyr') {
+      const uIdx = parseInt(t.dataset.udstyr);
+      const aIdx = parseInt(t.dataset.auto);
+      const u = state.master[mIdx].udstyr[uIdx];
+      if (!u._autoOverrides) u._autoOverrides = {};
+      if (!u._autoOverrides[aIdx]) u._autoOverrides[aIdx] = {};
+      u._autoOverrides[aIdx]._redigerer = true;
+      render();
+    } else if (action === 'annuller-auto-udstyr') {
+      const uIdx = parseInt(t.dataset.udstyr);
+      const aIdx = parseInt(t.dataset.auto);
+      const u = state.master[mIdx].udstyr[uIdx];
+      if (u._autoOverrides && u._autoOverrides[aIdx]) delete u._autoOverrides[aIdx]._redigerer;
+      render();
+    } else if (action === 'gem-auto-udstyr') {
+      const uIdx = parseInt(t.dataset.udstyr);
+      const aIdx = parseInt(t.dataset.auto);
+      const antalWrap = document.getElementById(`auto-u-antal-wrap-${mIdx}-${uIdx}-${aIdx}`);
+      const varenrWrap = document.getElementById(`auto-u-varenr-wrap-${mIdx}-${uIdx}-${aIdx}`);
+      const antalEl = antalWrap ? antalWrap.querySelector('select') : null;
+      const varenrEl = varenrWrap ? (varenrWrap.querySelector('select') || varenrWrap.querySelector('input')) : null;
+      const u = state.master[mIdx].udstyr[uIdx];
+      if (!u._autoOverrides) u._autoOverrides = {};
+      u._autoOverrides[aIdx] = {
+        antal: antalEl ? parseFloat(antalEl.value) : undefined,
+        varenr: varenrEl && varenrEl.value.trim() ? varenrEl.value.trim() : undefined,
+      };
+      render();
+    } else if (action === 'del-signal') {
+      const sIdx = parseInt(t.dataset.sig);
+      state.master[mIdx].signaler.splice(sIdx, 1);
+      render();
+    } else if (action === 'rediger-sig') {
+      const sIdx = parseInt(t.dataset.sig);
+      state.master[mIdx].signaler[sIdx]._redigerer = true;
+      render();
+    } else if (action === 'annuller-sig') {
+      const sIdx = parseInt(t.dataset.sig);
+      delete state.master[mIdx].signaler[sIdx]._redigerer;
+      render();
+    } else if (action === 'gem-sig') {
+      const sIdx = parseInt(t.dataset.sig);
+      const card = t.closest('.mast-card');
+      const sig = state.master[mIdx].signaler[sIdx];
+      const kategori = card.querySelector(`[data-rediger-sig="kategori"][data-sig="${sIdx}"]`);
+      const type = card.querySelector(`[data-rediger-sig="type"][data-sig="${sIdx}"]`);
+      const betegnelse = card.querySelector(`[data-rediger-sig="betegnelse"][data-sig="${sIdx}"]`);
+      const hojde = card.querySelector(`[data-rediger-sig="hojde"][data-sig="${sIdx}"]`);
+      const note = card.querySelector(`[data-rediger-sig="note"][data-sig="${sIdx}"]`);
+      const pilemaskeEl = card.querySelector(`[data-rediger-sig="pilemaske"][data-sig="${sIdx}"]`);
+      if (kategori) sig.kategori = kategori.value;
+      if (type) {
+        sig.type = type.value;
+        // Opdater varenr hvis muligt
+        for (const kat of SIGNAL_KATEGORIER) {
+          const match = kat.typer.find(ty => ty.label === type.value);
+          if (match) { sig.varenr = match.varenr; break; }
+        }
+      }
+      if (betegnelse) sig.betegnelse = betegnelse.value.trim();
+      if (hojde) sig.hojde = hojde.value;
+      if (note) sig.note = note.value.trim();
+      if (pilemaskeEl !== null) sig.pilemaske = pilemaskeEl ? pilemaskeEl.checked : false;
+      delete sig._redigerer;
+      render();
+    } else if (action === 'rediger-udstyr') {
+      const uIdx = parseInt(t.dataset.udstyr);
+      state.master[mIdx].udstyr[uIdx]._redigerer = true;
+      render();
+    } else if (action === 'annuller-udstyr') {
+      const uIdx = parseInt(t.dataset.udstyr);
+      delete state.master[mIdx].udstyr[uIdx]._redigerer;
+      render();
+    } else if (action === 'gem-udstyr') {
+      const uIdx = parseInt(t.dataset.udstyr);
+      const card = t.closest('.mast-card');
+      const u = state.master[mIdx].udstyr[uIdx];
+      const varenrEl = card.querySelector(`[data-rediger-u="varenr"][data-udstyr="${uIdx}"]`);
+      const antal = card.querySelector(`[data-rediger-u="antal"][data-udstyr="${uIdx}"]`);
+      const betegnelse = card.querySelector(`[data-rediger-u="betegnelse"][data-udstyr="${uIdx}"]`);
+      if (varenrEl && varenrEl.value) {
+        u.varenr = varenrEl.value;
+        const vare = findVare(varenrEl.value);
+        if (vare) u.type = vare.beskrivelse;
+      }
+      if (antal) u.antal = parseFloat(antal.value) || 1;
+      if (betegnelse) u.betegnelse = betegnelse.value.trim();
+      delete u._redigerer;
+      render();
+    } else if (action === 'add-udstyr') {
+      const card = t.closest('.mast-card');
+      const varenr = card.querySelector('[data-field="udstyrtype"]').value;
+      const betegnelse = card.querySelector('[data-field="udstyrbetegnelse"]').value.trim();
+      const antalInput = card.querySelector('[data-field="udstyrantal"]');
+      const meterInput = card.querySelector('[data-field="udstyrmeter"]');
+      const armSelect = card.querySelector('[data-field="udstyrarm"]');
+      const erKabel = KABEL_VARENUMRE.includes(varenr);
+      const rawAntal = erKabel
+        ? (meterInput && meterInput.value ? parseFloat(meterInput.value) : 1)
+        : (antalInput && antalInput.value ? parseFloat(antalInput.value) : 1);
+      const klistermEl = card.querySelector('[data-field="udstyrklistermaerke"]');
+      const forlængerArm = armSelect ? armSelect.value === 'ja' : false;
+      const klistermaerke = klistermEl ? klistermEl.checked : false;
+      if (!varenr) { visBesked('Vælg en vare først', 'danger'); return; }
+      const vare = findVare(varenr);
+      const gemAntal = isNaN(rawAntal) || rawAntal < 0.5 ? 1 : rawAntal;
+      const underkategoriEl = card.querySelector('[data-field="udstyrunderkategori"]');
+      const underkategori = underkategoriEl ? underkategoriEl.value : '';
+      state.master[mIdx].udstyr.push({ varenr, type: vare ? vare.beskrivelse : varenr, betegnelse, antal: gemAntal, forlængerArm, klistermaerke, underkategori });
+      card.querySelector('[data-field="udstyrbetegnelse"]').value = '';
+      if (meterInput) meterInput.value = '';
+      if (antalInput) antalInput.value = '1';
+      if (armSelect) armSelect.value = 'nej';
+      if (klistermEl) klistermEl.checked = false;
+      render();
+    } else if (action === 'add-signal') {
+      const card = t.closest('.mast-card');
+      const kategori = card.querySelector('[data-field="signalkategori"]').value;
+      const type = card.querySelector('[data-field="signaltype"]').value;
+      const betegnelse = card.querySelector('[data-field="betegnelse"]').value.trim();
+      const hojde = card.querySelector('[data-field="ny-hojde"]').value;
+      const note = card.querySelector('[data-field="note"]').value.trim();
+      const pilemaskeEl = card.querySelector('[data-field="pilemaske"]');
+      const pilemaske = pilemaskeEl ? pilemaskeEl.checked : false;
+      // Find varenr fra SIGNAL_KATEGORIER
+      let varenr = '';
+      for (const kat of SIGNAL_KATEGORIER) {
+        const match = kat.typer.find(ty => ty.label === type);
+        if (match) { varenr = match.varenr; break; }
+      }
+      state.master[mIdx].signaler.push({ type, varenr, kategori, betegnelse, hojde, note, pilemaske });
+      card.querySelector('[data-field="betegnelse"]').value = '';
+      card.querySelector('[data-field="note"]').value = '';
+      if (pilemaskeEl) pilemaskeEl.checked = false;
+      render();
+    }
+  }
+
+  function handleMasterChange(e) {
+    const t = e.target;
+    if (t.dataset.field === 'mastetype') {
+      const mIdx = parseInt(t.dataset.mast);
+      state.master[mIdx].mastetype = t.value;
+      opdaterOutput();
+    } else if (t.dataset.field === 'signalkategori') {
+      const card = t.closest('.mast-card');
+      const mIdx = parseInt(t.dataset.mast);
+      const typeSelect = card.querySelector('[data-field="signaltype"]');
+      const valgtKategori = t.value;
+      const kategori = SIGNAL_KATEGORIER.find(k => k.kategori === valgtKategori);
+      if (kategori) {
+        typeSelect.innerHTML = kategori.typer
+          .map(ty => `<option value="${escapeHtml(ty.label)}">${escapeHtml(ty.label)}</option>`)
+          .join('');
+        typeSelect.disabled = false;
+      } else {
+        typeSelect.innerHTML = '<option value="">— Vælg kategori først —</option>';
+        typeSelect.disabled = true;
+      }
+      // Vis pilemaske kun for Ercolight
+      const pilemaskeWrap = card.querySelector(`#pilemaske-wrap-${mIdx}`);
+      if (pilemaskeWrap) {
+        const erErcolight = valgtKategori.includes('Ercolight');
+        pilemaskeWrap.style.display = erErcolight ? '' : 'none';
+        if (!erErcolight) {
+          const cb = pilemaskeWrap.querySelector('input[type="checkbox"]');
+          if (cb) cb.checked = false;
+        }
+      }
+    } else if (t.dataset.redigersig === 'kategori' || t.getAttribute('data-rediger-sig') === 'kategori') {
+      // Live opdatering af type-dropdown i redigér-form
+      const card = t.closest('.mast-card');
+      const sIdx = parseInt(t.dataset.sig);
+      const typeSelect = card.querySelector(`[data-rediger-sig="type"][data-sig="${sIdx}"]`);
+      const valgtKategori = t.value;
+      const kategori = SIGNAL_KATEGORIER.find(k => k.kategori === valgtKategori);
+      if (typeSelect && kategori) {
+        typeSelect.innerHTML = kategori.typer
+          .map(ty => `<option value="${escapeHtml(ty.label)}">${escapeHtml(ty.label)}</option>`)
+          .join('');
+      }
+    } else if (t.getAttribute('data-rediger-u') === 'kategori') {
+      const card = t.closest('.mast-card');
+      const uIdx = parseInt(t.dataset.udstyr);
+      const vareSelect = card.querySelector(`[data-rediger-u="varenr"][data-udstyr="${uIdx}"]`);
+      const valgtKat = t.value;
+      const kat = UDSTYR_MENU.find(k => k.kategori === valgtKat);
+      if (vareSelect && kat) {
+        const alleVarer = kat.underkategorier
+          ? kat.underkategorier.flatMap(u => u.varer)
+          : (kat.varer || []);
+        vareSelect.innerHTML = alleVarer
+          .filter(v => !v.varenr.startsWith('INTERN-'))
+          .map(v => `<option value="${escapeHtml(v.varenr)}">${escapeHtml(v.beskrivelse)}</option>`)
+          .join('');
+      }
+    } else if (t.dataset.field === 'udstyrkategori') {
+      const card = t.closest('.mast-card');
+      const mIdx = parseInt(t.dataset.mast);
+      const vareSelect = card.querySelector('[data-field="udstyrtype"]');
+      const underWrap = card.querySelector(`#udstyr-under-wrap-${mIdx}`);
+      const underSelect = card.querySelector('[data-field="udstyrunderkategori"]');
+      const valgtKat = t.value;
+      const kat = UDSTYR_MENU.find(k => k.kategori === valgtKat);
+
+      if (kat && kat.underkategorier) {
+        // Vis underkategori-dropdown
+        underWrap.style.display = '';
+        underSelect.innerHTML = '<option value="">— Vælg underkategori —</option>' +
+          kat.underkategorier.map(u => `<option value="${escapeHtml(u.navn)}">${escapeHtml(u.navn)}</option>`).join('');
+        underSelect.disabled = false;
+        vareSelect.innerHTML = '<option value="">— Vælg underkategori først —</option>';
+        vareSelect.disabled = true;
+      } else if (kat && kat.varer) {
+        // Direkte til varer
+        underWrap.style.display = 'none';
+        underSelect.disabled = true;
+        vareSelect.innerHTML = kat.varer
+          .map(v => `<option value="${escapeHtml(v.varenr)}">${escapeHtml(v.beskrivelse)}</option>`)
+          .join('');
+        vareSelect.disabled = false;
+        // Vis meter-felt hvis kabel, ellers antal-felt
+        const meterWrap = card.querySelector(`#udstyr-meter-wrap-${mIdx}`);
+        const antalWrap = card.querySelector(`#udstyr-antal-wrap-${mIdx}`);
+        const armWrap = card.querySelector(`#udstyr-arm-wrap-${mIdx}`);
+        const erKabel = kat.varer.length > 0 && KABEL_VARENUMRE.includes(kat.varer[0].varenr);
+        const erRadar = kat.varer.length > 0 && RADAR_VARENUMRE.includes(kat.varer[0].varenr);
+        if (meterWrap) meterWrap.style.display = erKabel ? '' : 'none';
+        if (antalWrap) antalWrap.style.display = erKabel ? 'none' : '';
+        if (armWrap) armWrap.style.display = erRadar ? '' : 'none';
+      } else {
+        underWrap.style.display = 'none';
+        vareSelect.innerHTML = '<option value="">— Vælg kategori først —</option>';
+        vareSelect.disabled = true;
+      }
+    } else if (t.dataset.field === 'udstyrunderkategori') {
+      const card = t.closest('.mast-card');
+      const vareSelect = card.querySelector('[data-field="udstyrtype"]');
+      const katSelect = card.querySelector('[data-field="udstyrkategori"]');
+      const valgtKat = katSelect.value;
+      const valgtUnder = t.value;
+      const kat = UDSTYR_MENU.find(k => k.kategori === valgtKat);
+      const under = kat && kat.underkategorier ? kat.underkategorier.find(u => u.navn === valgtUnder) : null;
+      if (under && under.varer.length > 0) {
+        vareSelect.innerHTML = under.varer
+          .map(v => `<option value="${escapeHtml(v.varenr)}">${escapeHtml(v.beskrivelse)}</option>`)
+          .join('');
+        vareSelect.disabled = false;
+        const mIdx2 = parseInt(t.dataset.mast);
+        const meterWrap2 = card.querySelector(`#udstyr-meter-wrap-${mIdx2}`);
+        const antalWrap2 = card.querySelector(`#udstyr-antal-wrap-${mIdx2}`);
+        const armWrap2 = card.querySelector(`#udstyr-arm-wrap-${mIdx2}`);
+        const klistermWrap2 = card.querySelector(`#udstyr-klisterm-wrap-${mIdx2}`);
+        const erKabel2 = under.varer.length > 0 && KABEL_VARENUMRE.includes(under.varer[0].varenr);
+        const erRadar2 = under.varer.length > 0 && RADAR_VARENUMRE.includes(under.varer[0].varenr);
+        const erFodgTryk = valgtUnder === 'Prisma' || valgtUnder === 'RTB';
+        if (meterWrap2) meterWrap2.style.display = erKabel2 ? '' : 'none';
+        if (antalWrap2) antalWrap2.style.display = erKabel2 ? 'none' : '';
+        if (armWrap2) armWrap2.style.display = erRadar2 ? '' : 'none';
+        if (klistermWrap2) {
+          klistermWrap2.style.display = erFodgTryk ? '' : 'none';
+          if (!erFodgTryk) { const cb = klistermWrap2.querySelector('input'); if (cb) cb.checked = false; }
+        }
+      } else {
+        vareSelect.innerHTML = '<option value="">— Ingen varer endnu —</option>';
+        vareSelect.disabled = true;
+      }
+    }
+  }
+
+  function kopierOutput() {
+    const text = $('output').value;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text)
+        .then(() => visBesked('✓ Kopieret til udklipsholder'))
+        .catch(() => {
+          $('output').select();
+          document.execCommand('copy');
+          visBesked('✓ Kopieret');
+        });
+    } else {
+      $('output').select();
+      document.execCommand('copy');
+      visBesked('✓ Kopieret');
+    }
+  }
+
+  function generateStyklisteTekst() {
+    const dato = new Date().toISOString().slice(0, 10);
+    const nummer = fullTegningsnr();
+    const titel = nummer
+      ? `STYKLISTE – ANLÆG ${nummer}${state.navn ? ' – ' + state.navn : ''}`
+      : `STYKLISTE – ${state.navn || 'ANLÆG'}`;
+
+    const pad = (s, n) => String(s).padEnd(n).substring(0, n);
+    const COL1 = 18, COL2 = 36, COL3 = 10;
+    const topLine = '┌' + '─'.repeat(COL1+2) + '┬' + '─'.repeat(COL2+2) + '┬' + '─'.repeat(COL3+2) + '┐';
+    const midLine = '├' + '─'.repeat(COL1+2) + '┼' + '─'.repeat(COL2+2) + '┼' + '─'.repeat(COL3+2) + '┤';
+    const botLine = '└' + '─'.repeat(COL1+2) + '┴' + '─'.repeat(COL2+2) + '┴' + '─'.repeat(COL3+2) + '┘';
+    const row = (a, b, c) => `│ ${pad(a,COL1)} │ ${pad(b,COL2)} │ ${pad(c,COL3)} │`;
+
+    let t = titel + '\n' + '='.repeat(titel.length) + '\n';
+    t += `Dato: ${dato}   Master: ${state.master.length}\n\n`;
+
+    // Samlet total
+    const total = {};
+    state.master.forEach(mast => {
+      Object.entries(beregnStyklistePrMast(mast)).forEach(([varenr, antal]) => {
+        total[varenr] = (total[varenr] || 0) + antal;
+      });
+    });
+
+    if (Object.keys(total).length === 0) { t += 'Ingen varer.\n'; return t; }
+
+    // DEL 1: Kategorier med varer
+    VAREKATALOG.forEach(kat => {
+      const alleVarer = kat.underkategorier
+        ? kat.underkategorier.flatMap(u => u.varer)
+        : (kat.varer || []);
+      const varer = alleVarer.filter(v => total[v.varenr]);
+      if (varer.length === 0) return;
+      t += `${kat.kategori}:\n`;
+      varer.forEach(v => {
+        const erKabel = KABEL_VARENUMRE.includes(v.varenr);
+        const antalVis = erKabel ? total[v.varenr] + ' m' : total[v.varenr] + ' stk.';
+        const vn = visVarenr(v.varenr) || '—';
+        t += `  ${vn.padEnd(18)} ${v.beskrivelse} (${antalVis})\n`;
+      });
+      t += '\n';
+    });
+
+    // DEL 2: Samlet tabel
+    t += '='.repeat(COL1+COL2+COL3+10) + '\n';
+    t += 'SAMLET OVERSIGT\n';
+    t += '='.repeat(COL1+COL2+COL3+10) + '\n';
+    t += topLine + '\n';
+    t += row('Varenr.', 'Beskrivelse', 'Antal') + '\n';
+    t += midLine + '\n';
+    VAREKATALOG.forEach(kat => {
+      const alleVarer = kat.underkategorier
+        ? kat.underkategorier.flatMap(u => u.varer)
+        : (kat.varer || []);
+      const varer = alleVarer.filter(v => total[v.varenr]);
+      varer.forEach(v => {
+        const erKabel = KABEL_VARENUMRE.includes(v.varenr);
+        const antalVis = erKabel ? total[v.varenr] + ' m' : total[v.varenr] + ' stk.';
+        t += row(visVarenr(v.varenr) || '—', v.beskrivelse, antalVis) + '\n';
+      });
+    });
+    t += botLine + '\n';
+
+    return t;
+  }
+
+  function downloadStykliste() {
+    const format = $('stykliste-format').value;
+    const tekst = format === 'txt' ? generateStyklisteTekst() : generateStyklisteMarkdown();
+    const nummer = fullTegningsnr() || state.navn.replace(/[^a-zA-Z0-9æøåÆØÅ_-]/g, '_') || 'anlaeg';
+    const filnavn = `${nummer}-stykliste.${format}`;
+    const mimeType = format === 'txt' ? 'text/plain;charset=utf-8' : 'text/markdown;charset=utf-8';
+    const blob = new Blob([tekst], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filnavn;
+    a.click();
+    URL.revokeObjectURL(url);
+    visBesked(`✓ ${filnavn} downloadet`);
+  }
+
+  function downloadOutput() {
+    const format = $('format-vaelger').value;
+    const text = $('output').value;
+    const nummer = fullTegningsnr() || state.navn.replace(/[^a-zA-Z0-9æøåÆØÅ_-]/g, '_') || 'anlaeg';
+    const filnavn = `${nummer}.${format}`;
+    const mimeType = format === 'txt' ? 'text/plain;charset=utf-8' : 'text/markdown;charset=utf-8';
+    const blob = new Blob([text], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filnavn;
+    a.click();
+    URL.revokeObjectURL(url);
+    visBesked(`✓ ${filnavn} downloadet`);
+  }
+
+  // ==============================
+  // Init
+  // ==============================
+  // ==============================
+  // Supabase Integration
+  // ==============================
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+  let aktivBruger = null;
+  let aktivProfil = null;
+
+  async function tjekLogin() {
+    const { data } = await sb.auth.getSession();
+    if (!data.session) {
+      window.location.href = 'login.html';
+      return false;
+    }
+    aktivBruger = data.session.user;
+    // Hent profil
+    const { data: profil } = await sb.from('profiler').select('*').eq('id', aktivBruger.id).single();
+    aktivProfil = profil;
+    // Vis navn i header
+    const navnEl = document.getElementById('bruger-navn');
+    if (navnEl && profil) navnEl.textContent = profil.navn;
+    // Skjul admin-funktioner for ikke-admins
+    if (profil && profil.rolle !== 'admin') {
+      const githubCard = document.getElementById('github-sync-card');
+      if (githubCard) githubCard.style.display = 'none';
+    }
+    return true;
+  }
+
+  async function supabaseGemAnlaeg(key, data) {
+    if (!aktivBruger) return;
+    const nr = data.nr || key.replace(STORAGE_PREFIX, '');
+    const { error } = await sb.from('anlaeg').upsert({
+      nr: nr,
+      navn: data.navn || '',
+      data: data,
+      oprettet_af: aktivBruger.id,
+      opdateret_af: aktivBruger.id
+    }, { onConflict: 'nr' });
+    if (error) console.warn('Supabase gem fejl:', error);
+  }
+
+  async function supabaseHentAlle() {
+    const { data, error } = await sb.from('anlaeg').select('nr, navn, data').order('nr');
+    if (error || !data) return;
+    data.forEach(row => {
+      const key = STORAGE_PREFIX + row.nr;
+      localStorage.setItem(key, JSON.stringify(row.data));
+    });
+    opdaterGemtListe();
+  }
+
+  async function supabaseSletAnlaeg(nr) {
+    if (!aktivBruger) return;
+    await sb.from('anlaeg').delete().eq('nr', nr);
+  }
+
+  function init() {
+    tilkoblEvents();
+    opdaterFormFelter();
+    opdaterGemtListe();
+    render();
+
+    // Log ud knap
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) logoutBtn.addEventListener('click', async () => {
+      await sb.auth.signOut();
+      window.location.href = 'login.html';
+    });
+
+    // Login check + hent anlæg fra Supabase
+    tjekLogin().then(loggetInd => {
+      if (loggetInd) supabaseHentAlle();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
