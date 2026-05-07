@@ -70,17 +70,31 @@
       const { data: vkData, error: vkErr } = await sbClient.from('varekategorier').select('*').order('sortering');
       if (vkErr) { visFejl('Fejl varekategorier: ' + vkErr.message); return; }
       const { data: varerData } = await sbClient.from('varer').select('*').order('sortering');
+      const { data: underData } = await sbClient.from('vare_underkategorier').select('*').order('sortering');
       if (vkData) {
-        VAREKATALOG = vkData.map(k => ({
-          kategori: k.navn,
-          skjult: k.skjult,
-          varer: (varerData || []).filter(v => v.kategori_id === k.id).map(v => ({
-            varenr: v.varenr, beskrivelse: v.beskrivelse, bem: v.bem || ''
-          }))
-        }));
+        VAREKATALOG = vkData.map(k => {
+          const katVarer = (varerData || []).filter(v => v.kategori_id === k.id && !v.underkategori_id);
+          const underkat = (underData || []).filter(u => u.kategori_id === k.id);
+          const result = { kategori: k.navn, skjult: k.skjult };
+          if (underkat.length > 0) {
+            result.underkategorier = underkat.map(u => ({
+              navn: u.navn,
+              varer: (varerData || []).filter(v => v.underkategori_id === u.id).map(v => ({
+                varenr: v.varenr, beskrivelse: v.beskrivelse, bem: v.bem || ''
+              }))
+            }));
+          } else {
+            result.varer = katVarer.map(v => ({
+              varenr: v.varenr, beskrivelse: v.beskrivelse, bem: v.bem || ''
+            }));
+          }
+          return result;
+        });
         UDSTYR_MENU = VAREKATALOG.filter(k => !k.skjult);
         KABEL_VARENUMRE = (varerData || []).filter(v => v.er_kabel).map(v => v.varenr);
-        UDSTYR_TYPER = UDSTYR_MENU.flatMap(k => (k.varer || []).map(v => v.beskrivelse));
+        UDSTYR_TYPER = UDSTYR_MENU.flatMap(k => k.underkategorier
+          ? k.underkategorier.flatMap(u => u.varer.map(v => v.beskrivelse))
+          : (k.varer || []).map(v => v.beskrivelse));
       }
 
       SIGNAL_TYPER = SIGNAL_KATEGORIER.flatMap(k => k.typer.map(t => t.label));
