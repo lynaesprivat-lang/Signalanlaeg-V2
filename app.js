@@ -81,12 +81,12 @@
             result.underkategorier = underkat.map(u => ({
               navn: u.navn,
               varer: (varerData || []).filter(v => v.underkategori_id === u.id).map(v => ({
-                varenr: v.varenr, beskrivelse: v.beskrivelse, bem: v.bem || ''
+                varenr: v.varenr, beskrivelse: v.beskrivelse, bem: v.bem || '', kaldenavn: v.kaldenavn || ''
               }))
             }));
           } else {
             result.varer = katVarer.map(v => ({
-              varenr: v.varenr, beskrivelse: v.beskrivelse, bem: v.bem || ''
+              varenr: v.varenr, beskrivelse: v.beskrivelse, bem: v.bem || '', kaldenavn: v.kaldenavn || ''
             }));
           }
           return result;
@@ -244,7 +244,7 @@
                     </select></div>
                   <div class="field"><label>Vare</label>
                     <select data-rediger-u="varenr" data-mast="${mastIdx}" data-udstyr="${uIdx}">
-                      ${(findVareKategoriVarer(u.varenr) || []).filter(v => !v.varenr.startsWith('INTERN-')).map(v => `<option value="${escapeHtml(v.varenr)}"${v.varenr === u.varenr ? ' selected' : ''}>${escapeHtml(v.beskrivelse)}</option>`).join('')}
+                      ${(findVareKategoriVarer(u.varenr) || []).filter(v => !v.varenr.startsWith('INTERN-')).map(v => `<option value="${escapeHtml(v.varenr)}"${v.varenr === u.varenr ? ' selected' : ''}>${escapeHtml(visNavn(v))}</option>`).join('')}
                     </select></div>
                   <div class="field field-small"><label>Antal</label>
                     <input type="number" data-rediger-u="antal" data-mast="${mastIdx}" data-udstyr="${uIdx}" value="${u.antal || 1}" min="0.5" step="0.5" /></div>
@@ -964,6 +964,12 @@
     return varenr;
   }
 
+  // Vis kaldenavn i menus, beskrivelse i output
+  function visNavn(vare) {
+    if (!vare) return '';
+    return (vare.kaldenavn && vare.kaldenavn.trim()) ? vare.kaldenavn : vare.beskrivelse;
+  }
+
   function findMasteVarenr(label) {
     for (const g of MASTETYPER_GRUPPER) {
       const t = g.typer.find(t => t.label === label);
@@ -1005,7 +1011,7 @@
     if (!varer) return `<input type="text" value="${escapeHtml(selected)}" style="width:150px;font-size:13px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-2);color:var(--text)" />`;
     return `<select style="font-size:13px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-2);color:var(--text);min-width:180px">
       ${varer.filter(v => !v.varenr.startsWith('INTERN-')).map(v =>
-        `<option value="${escapeHtml(v.varenr)}"${v.varenr === selected ? ' selected' : ''}>${escapeHtml(v.beskrivelse)}</option>`
+        `<option value="${escapeHtml(v.varenr)}"${v.varenr === selected ? ' selected' : ''}>${escapeHtml(visNavn(v))}</option>`
       ).join('')}
     </select>`;
   }
@@ -1768,7 +1774,7 @@
           : (kat.varer || []);
         vareSelect.innerHTML = alleVarer
           .filter(v => !v.varenr.startsWith('INTERN-'))
-          .map(v => `<option value="${escapeHtml(v.varenr)}">${escapeHtml(v.beskrivelse)}</option>`)
+          .map(v => `<option value="${escapeHtml(v.varenr)}">${escapeHtml(visNavn(v))}</option>`)
           .join('');
       }
     } else if (t.dataset.field === 'udstyrkategori') {
@@ -1793,7 +1799,7 @@
         underWrap.style.display = 'none';
         underSelect.disabled = true;
         vareSelect.innerHTML = kat.varer
-          .map(v => `<option value="${escapeHtml(v.varenr)}">${escapeHtml(v.beskrivelse)}</option>`)
+          .map(v => `<option value="${escapeHtml(v.varenr)}">${escapeHtml(visNavn(v))}</option>`)
           .join('');
         vareSelect.disabled = false;
         // Vis meter-felt hvis kabel, ellers antal-felt
@@ -1820,7 +1826,7 @@
       const under = kat && kat.underkategorier ? kat.underkategorier.find(u => u.navn === valgtUnder) : null;
       if (under && under.varer.length > 0) {
         vareSelect.innerHTML = under.varer
-          .map(v => `<option value="${escapeHtml(v.varenr)}">${escapeHtml(v.beskrivelse)}</option>`)
+          .map(v => `<option value="${escapeHtml(v.varenr)}">${escapeHtml(visNavn(v))}</option>`)
           .join('');
         vareSelect.disabled = false;
         const mIdx2 = parseInt(t.dataset.mast);
