@@ -586,19 +586,15 @@
         t += header + '\n' + '-'.repeat(header.length) + '\n';
 
         // Mast auto-varer
-        const mastAutoVarer = autoVarerForMast(mast);
-        if (mastAutoVarer.length > 0) {
-          t += '\nAuto-tilfoejt til mast:\n';
-          mastAutoVarer.forEach(v => {
-            const vare = findVare(v.varenr);
-            t += `  >> ${vare ? vare.beskrivelse : v.varenr} x ${v.antal} stk. [${v.varenr}]\n`;
-          });
-        }
+        autoVarerForMast(mast).forEach(v => {
+          const vare = findVare(v.varenr);
+          const vn = visVarenr(v.varenr);
+          t += `  * ${vare ? vare.beskrivelse : v.varenr} x ${v.antal} stk.${vn ? ' [' + vn + ']' : ''}\n`;
+        });
 
-        if (mast.signaler.length === 0) {
-          t += '\nIngen signaler.\n';
-        } else {
-          t += '\nSignaler:\n';
+        // Signaler
+        if (mast.signaler.length > 0) {
+          t += '\n';
           mast.signaler.forEach(sig => {
             const vn = visVarenr(sig.varenr);
             let line = `  * ${sig.betegnelse || '?'}: ${sig.type}`;
@@ -608,32 +604,36 @@
             t += line + '\n';
             autoVarerForSignal(sig).forEach((v, aIdx) => {
               const override = (sig._autoOverrides || {})[aIdx] || {};
+              if (override._slettet) return;
               const varenr = override.varenr || v.varenr;
               const antal = override.antal !== undefined ? override.antal : v.antal;
               const vare = findVare(varenr);
+              const vn2 = visVarenr(varenr);
               const aLabel = Number.isInteger(antal) ? `${antal} stk.` : `${antal} m`;
-              t += `    >> ${vare ? vare.beskrivelse : varenr} x ${aLabel} [${varenr}]\n`;
+              t += `    * ${vare ? vare.beskrivelse : varenr} x ${aLabel}${vn2 ? ' [' + vn2 + ']' : ''}\n`;
             });
           });
         }
 
+        // Ekstra udstyr
         if (mast.udstyr && mast.udstyr.length > 0) {
-          t += '\nEkstra udstyr:\n';
+          t += '\n';
           mast.udstyr.forEach(u => {
             const vn = visVarenr(u.varenr);
             const erKabel = KABEL_VARENUMRE.includes(u.varenr);
             const antalLabel = erKabel ? `${u.antal || 1} m` : `${u.antal || 1} stk.`;
             let line = `  * ${u.type || ''}${u.betegnelse ? ' - ' + u.betegnelse : ''} x ${antalLabel}`;
             if (vn) line += ` [${vn}]`;
-            if (u.forloengerArm) line += ' (forlaenger arm)';
             t += line + '\n';
             autoVarerForUdstyr(u, mast.mastetype).forEach((v, aIdx) => {
               const override = (u._autoOverrides || {})[aIdx] || {};
+              if (override._slettet) return;
               const varenr = override.varenr || v.varenr;
               const antal = override.antal !== undefined ? override.antal : v.antal;
               const vare = findVare(varenr);
+              const vn2 = visVarenr(varenr);
               const aLabel = Number.isInteger(antal) ? `${antal} stk.` : `${antal} m`;
-              t += `    >> ${vare ? vare.beskrivelse : varenr} x ${aLabel} [${varenr}]\n`;
+              t += `    * ${vare ? vare.beskrivelse : varenr} x ${aLabel}${vn2 ? ' [' + vn2 + ']' : ''}\n`;
             });
           });
         }
@@ -674,19 +674,15 @@
         md += `## ${mast.mastId} – ${mast.mastetype}${masteVarenr ? ` \`${masteVarenr}\`` : ''}\n\n`;
         if (mast.mastetype) md += `**Mastetype:** ${mast.mastetype}${masteVarenr ? ` · \`${masteVarenr}\`` : ''}\n`;
 
-        const mastAutoVarer = autoVarerForMast(mast);
-        if (mastAutoVarer.length > 0) {
-          md += '\n**Auto-tilføjet til mast:**\n';
-          mastAutoVarer.forEach(v => {
-            const vare = findVare(v.varenr);
-            md += `- ↳ ${vare ? vare.beskrivelse : v.varenr} × ${v.antal} stk. · \`${v.varenr}\`\n`;
-          });
-        }
+        // Mast varer (auto)
+        autoVarerForMast(mast).forEach(v => {
+          const vare = findVare(v.varenr);
+          const vn = visVarenr(v.varenr);
+          md += `- ${vare ? vare.beskrivelse : v.varenr} × ${v.antal} stk.${vn ? ` · \`${vn}\`` : ''}\n`;
+        });
         md += '\n';
 
-        if (mast.signaler.length === 0) {
-          md += '**Signaler:** _Ingen signaler._\n\n';
-        } else {
+        if (mast.signaler.length > 0) {
           md += '**Signaler:**\n';
           mast.signaler.forEach(sig => {
             const vn = visVarenr(sig.varenr);
@@ -697,11 +693,13 @@
             md += line + '\n';
             autoVarerForSignal(sig).forEach((v, aIdx) => {
               const override = (sig._autoOverrides || {})[aIdx] || {};
+              if (override._slettet) return;
               const varenr = override.varenr || v.varenr;
               const antal = override.antal !== undefined ? override.antal : v.antal;
               const vare = findVare(varenr);
+              const vn2 = visVarenr(varenr);
               const aLabel = Number.isInteger(antal) ? `${antal} stk.` : `${antal} m`;
-              md += `  - ↳ ${vare ? vare.beskrivelse : varenr} × ${aLabel} · \`${varenr}\`\n`;
+              md += `  - ${vare ? vare.beskrivelse : varenr} × ${aLabel}${vn2 ? ` · \`${vn2}\`` : ''}\n`;
             });
           });
           md += '\n';
@@ -715,15 +713,16 @@
             const antalLabel = erKabel ? `${u.antal || 1} m` : `${u.antal || 1} stk.`;
             let line = `- ${u.type || ''}${u.betegnelse ? ' – ' + u.betegnelse : ''} × ${antalLabel}`;
             if (vn) line += ` · \`${vn}\``;
-            if (u.forlængerArm) line += ' _(forlænger arm)_';
             md += line + '\n';
             autoVarerForUdstyr(u, mast.mastetype).forEach((v, aIdx) => {
               const override = (u._autoOverrides || {})[aIdx] || {};
+              if (override._slettet) return;
               const varenr = override.varenr || v.varenr;
               const antal = override.antal !== undefined ? override.antal : v.antal;
               const vare = findVare(varenr);
+              const vn2 = visVarenr(varenr);
               const aLabel = Number.isInteger(antal) ? `${antal} stk.` : `${antal} m`;
-              md += `  - ↳ ${vare ? vare.beskrivelse : varenr} × ${aLabel} · \`${varenr}\`\n`;
+              md += `  - ${vare ? vare.beskrivelse : varenr} × ${aLabel}${vn2 ? ` · \`${vn2}\`` : ''}\n`;
             });
           });
           md += '\n';
