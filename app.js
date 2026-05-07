@@ -24,10 +24,24 @@
   const SPAENDBAAND_ARM_DEFAULT = '280-850-0005';
   const SPAENDBAAND_ARM_FLIR    = '280-850-0016';
 
+  // Storage
+  const STORAGE_PREFIX = 'signalanlaeg:';
+
+  // UI state
+  let mastFilter = null;
+  const collapsedMaster = new Set();
+  const openSigSections = new Set();
+  const openUdstyrSections = new Set();
+
   async function indlaesKatalogFraSupabase(sbClient) {
+    const visFejl = (msg) => {
+      const el = document.getElementById('status-besked');
+      if (el) { el.textContent = msg; el.style.color = 'red'; el.style.display = 'block'; }
+      console.warn(msg);
+    };
     try {
-      // Signal kategorier og typer
-      const { data: skData } = await sbClient.from('signal_kategorier').select('*, signal_typer(*)').order('sortering');
+      const { data: skData, error: skErr } = await sbClient.from('signal_kategorier').select('*, signal_typer(*)').order('sortering');
+      if (skErr) { visFejl('Fejl signal_kategorier: ' + skErr.message); return; }
       if (skData) {
         SIGNAL_KATEGORIER = skData.map(k => ({
           kategori: k.navn,
@@ -35,14 +49,13 @@
         }));
       }
 
-      // Maste grupper og typer
-      const { data: mgData } = await sbClient.from('maste_grupper').select('*, maste_typer(*)').order('sortering');
+      const { data: mgData, error: mgErr } = await sbClient.from('maste_grupper').select('*, maste_typer(*)').order('sortering');
+      if (mgErr) { visFejl('Fejl maste_grupper: ' + mgErr.message); return; }
       if (mgData) {
         MASTETYPER_GRUPPER = mgData.map(g => ({
           gruppe: g.navn,
           typer: (g.maste_typer || []).sort((a,b) => a.sortering - b.sortering).map(t => ({ label: t.label, varenr: t.varenr }))
         }));
-        // Byg SPAENDBAAND_PR_MAST
         SPAENDBAAND_PR_MAST = {};
         mgData.forEach(g => {
           (g.maste_typer || []).forEach(t => {
@@ -51,8 +64,8 @@
         });
       }
 
-      // Varekatalog
-      const { data: vkData } = await sbClient.from('varekategorier').select('*, varer(*)').order('sortering');
+      const { data: vkData, error: vkErr } = await sbClient.from('varekategorier').select('*, varer(*)').order('sortering');
+      if (vkErr) { visFejl('Fejl varekategorier: ' + vkErr.message); return; }
       if (vkData) {
         VAREKATALOG = vkData.map(k => ({
           kategori: k.navn,
@@ -65,8 +78,12 @@
         KABEL_VARENUMRE = vkData.flatMap(k => (k.varer || []).filter(v => v.er_kabel).map(v => v.varenr));
       }
 
-      console.log('Katalog indlæst fra Supabase ✓');
+      const el = document.getElementById('status-besked');
+      if (el) el.style.display = 'none';
+      console.log('Katalog OK — SK:', SIGNAL_KATEGORIER.length, 'MG:', MASTETYPER_GRUPPER.length, 'VK:', VAREKATALOG.length);
     } catch (err) {
+      const el = document.getElementById('status-besked');
+      if (el) { el.textContent = 'Katalog fejl: ' + err.message; el.style.color = 'red'; el.style.display = 'block'; }
       console.warn('Supabase katalog fejl:', err);
     }
   }
