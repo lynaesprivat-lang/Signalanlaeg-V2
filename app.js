@@ -933,6 +933,31 @@
   }
 
   // Find kategorinavn for et varenr
+  // Hjælpefunktioner
+  function findVare(varenr) {
+    for (const kat of VAREKATALOG) {
+      const alleVarer = kat.underkategorier
+        ? kat.underkategorier.flatMap(u => u.varer)
+        : (kat.varer || []);
+      const v = alleVarer.find(v => v.varenr === varenr);
+      if (v) return v;
+    }
+    return null;
+  }
+
+  function visVarenr(varenr) {
+    if (!varenr || varenr.startsWith('INTERN-')) return '';
+    return varenr;
+  }
+
+  function findMasteVarenr(label) {
+    for (const g of MASTETYPER_GRUPPER) {
+      const t = g.typer.find(t => t.label === label);
+      if (t) return visVarenr(t.varenr) || '';
+    }
+    return '';
+  }
+
   function findVareKategoriNavn(varenr) {
     for (const kat of VAREKATALOG) {
       if (kat.underkategorier) {
