@@ -466,7 +466,7 @@
           </div>
           <div style="display:flex;gap:4px">
             ${mast._redigerer ? '' : `<button class="btn-icon btn-rediger" data-action="rediger-mast" data-mast="${mastIdx}" title="Redigér mast">✎</button>`}
-            <button class="btn-icon" data-action="del-mast" data-mast="${mastIdx}">Slet</button>
+            ${erAdmin ? `<button class="btn-icon" data-action="del-mast" data-mast="${mastIdx}">Slet</button>` : ''}
           </div>
         </div>
         ${mastAutoHtml ? `<div style="padding:0 0 0.5rem">${mastAutoHtml}</div>` : ''}
@@ -2002,6 +2002,7 @@
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
   let aktivBruger = null;
   let aktivProfil = null;
+  let erAdmin = false;
 
   async function tjekLogin() {
     const { data } = await sb.auth.getSession();
@@ -2013,6 +2014,7 @@
     // Hent profil
     const { data: profil } = await sb.from('profiler').select('*').eq('id', aktivBruger.id).single();
     aktivProfil = profil;
+    erAdmin = profil && profil.rolle === 'admin';
     // Vis navn i header
     const navnEl = document.getElementById('bruger-navn');
     if (navnEl && profil) navnEl.textContent = profil.navn;
@@ -2020,6 +2022,12 @@
     if (profil && profil.rolle !== 'admin') {
       const githubCard = document.getElementById('github-sync-card');
       if (githubCard) githubCard.style.display = 'none';
+      const sletBtn = document.getElementById('slet-btn');
+      if (sletBtn) sletBtn.style.display = 'none';
+      const omdoebBtn = document.getElementById('omdoeb-btn');
+      if (omdoebBtn) omdoebBtn.style.display = 'none';
+      const omdoebContainer = document.getElementById('omdoeb-container');
+      if (omdoebContainer) omdoebContainer.style.display = 'none';
     }
     return true;
   }
