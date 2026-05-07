@@ -2052,6 +2052,7 @@
       await indlaesKatalogFraSupabase(sb);
       // Opdater mastetype dropdown i HTML
       opdaterMasteDropdowns();
+      console.log('MG[1] typer:', JSON.stringify(MASTETYPER_GRUPPER[1]?.typer?.slice(0,3)));
       // Nu er katalog klar — render og hent anlæg
       if (main) main.style.opacity = '1';
       opdaterGemtListe();
@@ -2061,25 +2062,22 @@
   }
 
   function opdaterMasteDropdowns() {
-    // Opdater mastetype select i index.html dynamisk
-    const selects = document.querySelectorAll('[id="ny-mastetype"], select[name="mastetype"]');
-    selects.forEach(sel => {
-      if (!sel) return;
-      const current = sel.value;
-      sel.innerHTML = '<option value="">— Vælg mastetype —</option>';
-      MASTETYPER_GRUPPER.forEach(grp => {
-        const og = document.createElement('optgroup');
-        og.label = grp.gruppe;
-        grp.typer.forEach(t => {
-          const opt = document.createElement('option');
-          opt.value = t.label;
-          opt.textContent = visNavn(t) || t.label;
-          og.appendChild(opt);
-        });
-        sel.appendChild(og);
+    const sel = $('ny-mastetype');
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Vælg mastetype —</option>';
+    MASTETYPER_GRUPPER.forEach(grp => {
+      const og = document.createElement('optgroup');
+      og.label = grp.gruppe;
+      grp.typer.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.label;
+        opt.textContent = visNavn(t) || t.label;
+        og.appendChild(opt);
       });
-      if (current) sel.value = current;
+      sel.appendChild(og);
     });
+    if (current) sel.value = current;
   }
 
   if (document.readyState === 'loading') {
