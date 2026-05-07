@@ -49,7 +49,9 @@
       if (skData) {
         SIGNAL_KATEGORIER = skData.map(k => ({
           kategori: k.navn,
-          typer: (stData || []).filter(t => t.kategori_id === k.id).map(t => ({ label: t.label, varenr: t.varenr }))
+          typer: (stData || []).filter(t => t.kategori_id === k.id).map(t => ({ 
+            label: t.label, varenr: t.varenr, kaldenavn: t.kaldenavn || ''
+          }))
         }));
       }
 
@@ -59,7 +61,9 @@
       if (mgData) {
         MASTETYPER_GRUPPER = mgData.map(g => ({
           gruppe: g.navn,
-          typer: (mtData || []).filter(t => t.gruppe_id === g.id).map(t => ({ label: t.label, varenr: t.varenr }))
+          typer: (mtData || []).filter(t => t.gruppe_id === g.id).map(t => ({ 
+            label: t.label, varenr: t.varenr, kaldenavn: t.kaldenavn || ''
+          }))
         }));
         SPAENDBAAND_PR_MAST = {};
         (mtData || []).forEach(t => {
@@ -320,7 +324,7 @@
             ).join('');
             const valgtKat = SIGNAL_KATEGORIER.find(k => k.kategori === sig.kategori);
             const typeOpts = valgtKat ? valgtKat.typer.map(ty =>
-              `<option value="${escapeHtml(ty.label)}"${ty.label === sig.type ? ' selected' : ''}>${escapeHtml(ty.label)}</option>`
+              `<option value="${escapeHtml(ty.label)}"${ty.label === sig.type ? ' selected' : ''}>${escapeHtml(visNavn(ty))}</option>`
             ).join('') : `<option value="${escapeHtml(sig.type)}">${escapeHtml(sig.type)}</option>`;
             return `
               <div class="item-row rediger-row">
@@ -410,7 +414,7 @@
     const hojdeOptions = HOJDE_MULIGHEDER.map(h => `<option value="${escapeHtml(h)}">${h || '—'}</option>`).join('');
     const mastetypeOptions = MASTETYPER_GRUPPER.map(g =>
       `<optgroup label="${escapeHtml(g.gruppe)}">${g.typer.map(m =>
-        `<option value="${escapeHtml(m.label)}"${m.label === mast.mastetype ? ' selected' : ''}>${escapeHtml(m.label)}</option>`
+        `<option value="${escapeHtml(m.label)}"${m.label === mast.mastetype ? ' selected' : ''}>${escapeHtml(visNavn(m))}</option>`
       ).join('')}</optgroup>`
     ).join('');
 
@@ -964,10 +968,10 @@
     return varenr;
   }
 
-  // Vis kaldenavn i menus, beskrivelse i output
-  function visNavn(vare) {
-    if (!vare) return '';
-    return (vare.kaldenavn && vare.kaldenavn.trim()) ? vare.kaldenavn : vare.beskrivelse;
+  // Vis kaldenavn i menus, label/beskrivelse i output
+  function visNavn(obj) {
+    if (!obj) return '';
+    return (obj.kaldenavn && obj.kaldenavn.trim()) ? obj.kaldenavn : (obj.beskrivelse || obj.label || '');
   }
 
   function findMasteVarenr(label) {
@@ -1733,7 +1737,7 @@
       const kategori = SIGNAL_KATEGORIER.find(k => k.kategori === valgtKategori);
       if (kategori) {
         typeSelect.innerHTML = kategori.typer
-          .map(ty => `<option value="${escapeHtml(ty.label)}">${escapeHtml(ty.label)}</option>`)
+          .map(ty => `<option value="${escapeHtml(ty.label)}">${escapeHtml(visNavn(ty))}</option>`)
           .join('');
         typeSelect.disabled = false;
       } else {
@@ -1759,7 +1763,7 @@
       const kategori = SIGNAL_KATEGORIER.find(k => k.kategori === valgtKategori);
       if (typeSelect && kategori) {
         typeSelect.innerHTML = kategori.typer
-          .map(ty => `<option value="${escapeHtml(ty.label)}">${escapeHtml(ty.label)}</option>`)
+          .map(ty => `<option value="${escapeHtml(ty.label)}">${escapeHtml(visNavn(ty))}</option>`)
           .join('');
       }
     } else if (t.getAttribute('data-rediger-u') === 'kategori') {
@@ -2069,7 +2073,7 @@
         grp.typer.forEach(t => {
           const opt = document.createElement('option');
           opt.value = t.label;
-          opt.textContent = t.label;
+          opt.textContent = visNavn(t) || t.label;
           og.appendChild(opt);
         });
         sel.appendChild(og);
