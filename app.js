@@ -82,6 +82,7 @@
       }
 
       SIGNAL_TYPER = SIGNAL_KATEGORIER.flatMap(k => k.typer.map(t => t.label));
+      console.log('SK[0]:', JSON.stringify(SIGNAL_KATEGORIER[0]));
 
       const el = document.getElementById('status-besked');
       if (el) el.style.display = 'none';
