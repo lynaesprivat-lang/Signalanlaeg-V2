@@ -17,6 +17,7 @@
   let SIGNAL_TYPER = [];
 
   const HOJDE_MULIGHEDER = ['', 'Højt', 'Lavt'];
+  const FLIR_VARENUMRE = ['250-650-0118', '250-650-0119'];
   const RADAR_VARENUMRE = [
     '250-650-0160', '250-650-0161', '250-650-0164', '250-650-0165', '250-650-0167',
     '250-650-0118', '250-650-0119',
