@@ -71,6 +71,7 @@
       if (vkErr) { visFejl('Fejl varekategorier: ' + vkErr.message); return; }
       const { data: varerData } = await sbClient.from('varer').select('*').order('sortering');
       const { data: underData } = await sbClient.from('vare_underkategorier').select('*').order('sortering');
+      console.log('underData:', underData ? underData.length : 'null', underData ? JSON.stringify(underData[0]) : '');
       if (vkData) {
         VAREKATALOG = vkData.map(k => {
           const katVarer = (varerData || []).filter(v => v.kategori_id === k.id && !v.underkategori_id);
