@@ -730,6 +730,28 @@
     planAutoGem();
   }
 
+  function renderMastFilter() {
+    const wrap = $('mast-filter-wrap');
+    const checkboxes = $('mast-filter-checkboxes');
+    if (!wrap || !checkboxes) return;
+    if (state.master.length === 0) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+    checkboxes.innerHTML = state.master.map(m => `
+      <label class="mast-filter-chip ${!mastFilter || mastFilter.has(m.mastId) ? 'aktiv' : ''}">
+        <input type="checkbox" data-mast-filter="${escapeHtml(m.mastId)}"
+          ${!mastFilter || mastFilter.has(m.mastId) ? 'checked' : ''} />
+        ${escapeHtml(m.mastId)}
+      </label>`).join('');
+    checkboxes.querySelectorAll('input[data-mast-filter]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (!mastFilter) mastFilter = new Set(state.master.map(m => m.mastId));
+        if (cb.checked) mastFilter.add(cb.dataset.mastFilter);
+        else mastFilter.delete(cb.dataset.mastFilter);
+        opdaterOutput();
+      });
+    });
+  }
+
   // ==============================
   // Automatiske regler
   // ==============================
