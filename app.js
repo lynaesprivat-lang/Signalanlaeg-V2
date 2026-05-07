@@ -13,6 +13,8 @@
   let SPAENDBAAND_PR_MAST = {};
   let UDSTYR_MENU = [];
   let KABEL_VARENUMRE = [];
+  let UDSTYR_TYPER = [];
+  let SIGNAL_TYPER = [];
 
   const HOJDE_MULIGHEDER = ['', 'Højt', 'Lavt'];
   const RADAR_VARENUMRE = [
@@ -76,7 +78,10 @@
         }));
         UDSTYR_MENU = VAREKATALOG.filter(k => !k.skjult);
         KABEL_VARENUMRE = vkData.flatMap(k => (k.varer || []).filter(v => v.er_kabel).map(v => v.varenr));
+        UDSTYR_TYPER = UDSTYR_MENU.flatMap(k => (k.varer || []).map(v => v.beskrivelse));
       }
+
+      SIGNAL_TYPER = SIGNAL_KATEGORIER.flatMap(k => k.typer.map(t => t.label));
 
       const el = document.getElementById('status-besked');
       if (el) el.style.display = 'none';
