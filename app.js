@@ -460,7 +460,7 @@
               <button class="btn-secondary" style="padding:4px 10px;font-size:12px" data-action="annuller-mast" data-mast="${mastIdx}">Annullér</button>
             ` : `
               <span class="mast-title">${escapeHtml(mast.mastId)}</span>
-              <span class="mast-subtype-label">${escapeHtml(mast.mastetype)}</span>
+              <span class="mast-subtype-label">${escapeHtml(findMasteVisNavn(mast.mastetype))}</span>
               <span class="mast-summary" style="display:none">${escapeHtml(summary)}</span>
             `}
           </div>
@@ -993,6 +993,14 @@
       if (t) return visVarenr(t.varenr) || '';
     }
     return '';
+  }
+
+  function findMasteVisNavn(label) {
+    for (const g of MASTETYPER_GRUPPER) {
+      const t = g.typer.find(t => t.label === label);
+      if (t) return visNavn(t) || label;
+    }
+    return label;
   }
 
   function findVareKategoriNavn(varenr) {
