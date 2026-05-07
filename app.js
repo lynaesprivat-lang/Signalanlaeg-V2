@@ -42,42 +42,43 @@
       console.warn(msg);
     };
     try {
-      const { data: skData, error: skErr } = await sbClient.from('signal_kategorier').select('*, signal_typer(*)').order('sortering');
+      const { data: skData, error: skErr } = await sbClient.from('signal_kategorier').select('*').order('sortering');
       if (skErr) { visFejl('Fejl signal_kategorier: ' + skErr.message); return; }
+      const { data: stData } = await sbClient.from('signal_typer').select('*').order('sortering');
       if (skData) {
         SIGNAL_KATEGORIER = skData.map(k => ({
           kategori: k.navn,
-          typer: (k.signal_typer || []).sort((a,b) => a.sortering - b.sortering).map(t => ({ label: t.label, varenr: t.varenr }))
+          typer: (stData || []).filter(t => t.kategori_id === k.id).map(t => ({ label: t.label, varenr: t.varenr }))
         }));
       }
 
-      const { data: mgData, error: mgErr } = await sbClient.from('maste_grupper').select('*, maste_typer(*)').order('sortering');
+      const { data: mgData, error: mgErr } = await sbClient.from('maste_grupper').select('*').order('sortering');
       if (mgErr) { visFejl('Fejl maste_grupper: ' + mgErr.message); return; }
+      const { data: mtData } = await sbClient.from('maste_typer').select('*').order('sortering');
       if (mgData) {
         MASTETYPER_GRUPPER = mgData.map(g => ({
           gruppe: g.navn,
-          typer: (g.maste_typer || []).sort((a,b) => a.sortering - b.sortering).map(t => ({ label: t.label, varenr: t.varenr }))
+          typer: (mtData || []).filter(t => t.gruppe_id === g.id).map(t => ({ label: t.label, varenr: t.varenr }))
         }));
         SPAENDBAAND_PR_MAST = {};
-        mgData.forEach(g => {
-          (g.maste_typer || []).forEach(t => {
-            if (t.spaendbaand_varenr) SPAENDBAAND_PR_MAST[t.label] = t.spaendbaand_varenr;
-          });
+        (mtData || []).forEach(t => {
+          if (t.spaendbaand_varenr) SPAENDBAAND_PR_MAST[t.label] = t.spaendbaand_varenr;
         });
       }
 
-      const { data: vkData, error: vkErr } = await sbClient.from('varekategorier').select('*, varer(*)').order('sortering');
+      const { data: vkData, error: vkErr } = await sbClient.from('varekategorier').select('*').order('sortering');
       if (vkErr) { visFejl('Fejl varekategorier: ' + vkErr.message); return; }
+      const { data: varerData } = await sbClient.from('varer').select('*').order('sortering');
       if (vkData) {
         VAREKATALOG = vkData.map(k => ({
           kategori: k.navn,
           skjult: k.skjult,
-          varer: (k.varer || []).sort((a,b) => a.sortering - b.sortering).map(v => ({
+          varer: (varerData || []).filter(v => v.kategori_id === k.id).map(v => ({
             varenr: v.varenr, beskrivelse: v.beskrivelse, bem: v.bem || ''
           }))
         }));
         UDSTYR_MENU = VAREKATALOG.filter(k => !k.skjult);
-        KABEL_VARENUMRE = vkData.flatMap(k => (k.varer || []).filter(v => v.er_kabel).map(v => v.varenr));
+        KABEL_VARENUMRE = (varerData || []).filter(v => v.er_kabel).map(v => v.varenr);
         UDSTYR_TYPER = UDSTYR_MENU.flatMap(k => (k.varer || []).map(v => v.beskrivelse));
       }
 
