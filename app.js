@@ -2020,8 +2020,6 @@
     if (navnEl && profil) navnEl.textContent = profil.navn;
     // Skjul admin-funktioner for ikke-admins
     if (profil && profil.rolle !== 'admin') {
-      const githubCard = document.getElementById('github-sync-card');
-      if (githubCard) githubCard.style.display = 'none';
       const sletBtn = document.getElementById('slet-btn');
       if (sletBtn) sletBtn.style.display = 'none';
       const omdoebBtn = document.getElementById('omdoeb-btn');
