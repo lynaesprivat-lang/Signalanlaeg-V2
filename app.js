@@ -43,15 +43,25 @@
       console.warn(msg);
     };
     try {
+      // Hent varer først så kaldenavn er tilgængeligt for alle opslag
+      const { data: varerData } = await sbClient.from('varer').select('*').order('sortering');
+      const { data: underData } = await sbClient.from('vare_underkategorier').select('*').order('sortering');
+      console.log('underData:', underData ? underData.length : 'null', underData ? JSON.stringify(underData[0]) : '');
+
       const { data: skData, error: skErr } = await sbClient.from('signal_kategorier').select('*').order('sortering');
       if (skErr) { visFejl('Fejl signal_kategorier: ' + skErr.message); return; }
       const { data: stData } = await sbClient.from('signal_typer').select('*').order('sortering');
       if (skData) {
         SIGNAL_KATEGORIER = skData.map(k => ({
           kategori: k.navn,
-          typer: (stData || []).filter(t => t.kategori_id === k.id).map(t => ({ 
-            label: t.label, varenr: t.varenr, kaldenavn: t.kaldenavn || ''
-          }))
+          typer: (stData || []).filter(t => t.kategori_id === k.id).map(t => {
+            const vare = (varerData || []).find(v => v.varenr === t.varenr);
+            return { 
+              label: t.label, 
+              varenr: t.varenr, 
+              kaldenavn: (vare && vare.kaldenavn) ? vare.kaldenavn : (t.kaldenavn || '')
+            };
+          })
         }));
       }
 
@@ -61,9 +71,15 @@
       if (mgData) {
         MASTETYPER_GRUPPER = mgData.map(g => ({
           gruppe: g.navn,
-          typer: (mtData || []).filter(t => t.gruppe_id === g.id).map(t => ({ 
-            label: t.label, varenr: t.varenr, kaldenavn: t.kaldenavn || ''
-          }))
+          typer: (mtData || []).filter(t => t.gruppe_id === g.id).map(t => {
+            // Slå kaldenavn op fra varer tabellen
+            const vare = (varerData || []).find(v => v.varenr === t.varenr);
+            return { 
+              label: t.label, 
+              varenr: t.varenr, 
+              kaldenavn: (vare && vare.kaldenavn) ? vare.kaldenavn : (t.kaldenavn || '')
+            };
+          })
         }));
         SPAENDBAAND_PR_MAST = {};
         (mtData || []).forEach(t => {
@@ -73,9 +89,6 @@
 
       const { data: vkData, error: vkErr } = await sbClient.from('varekategorier').select('*').order('sortering');
       if (vkErr) { visFejl('Fejl varekategorier: ' + vkErr.message); return; }
-      const { data: varerData } = await sbClient.from('varer').select('*').order('sortering');
-      const { data: underData } = await sbClient.from('vare_underkategorier').select('*').order('sortering');
-      console.log('underData:', underData ? underData.length : 'null', underData ? JSON.stringify(underData[0]) : '');
       if (vkData) {
         VAREKATALOG = vkData.map(k => {
           const katVarer = (varerData || []).filter(v => v.kategori_id === k.id && !v.underkategori_id);
