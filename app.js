@@ -1245,6 +1245,32 @@
     });
   }
 
+  function indlaesAnlaeg(key) {
+    if (!key) return;
+    try {
+      const data = localStorage.getItem(key);
+      if (!data) return;
+      state = JSON.parse(data);
+      opdaterFormFelter();
+      collapsedMaster.clear();
+      state.master.forEach((_, i) => collapsedMaster.add(i));
+      render();
+      visBesked('✓ Anlæg indlæst');
+    } catch (err) {
+      visBesked('Kunne ikke indlæse: ' + err.message, 'danger');
+    }
+  }
+
+  function sletAnlaeg(key) {
+    if (!key) return;
+    if (!confirm('Slet det gemte anlæg permanent?')) return;
+    const navn = key.replace(STORAGE_PREFIX, '');
+    localStorage.removeItem(key);
+    opdaterGemtListe();
+    visBesked('Anlæg slettet');
+    supabaseSletAnlaeg(navn).catch(() => {});
+  }
+
   function gemAnlaeg() {
     const idDel = state.nr.trim() || state.navn.trim();
     if (!idDel) {
