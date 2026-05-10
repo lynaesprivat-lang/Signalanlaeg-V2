@@ -116,9 +116,25 @@
       }
 
       SIGNAL_TYPER = SIGNAL_KATEGORIER.flatMap(k => k.typer.map(t => t.label));
-      const ft = UDSTYR_MENU.find(k => k.kategori === 'Fodgænger Tryk');
-      console.log('FT:', JSON.stringify(ft));
-      console.log('SK[0]:', JSON.stringify(SIGNAL_KATEGORIER[0]));
+
+      // Indlæs auto-regler
+      const { data: reglerData } = await sbClient.from('auto_regler').select('*, auto_regel_varer(*)').order('sortering');
+      if (reglerData) {
+        const bygRegler = (type) => reglerData.filter(r => r.type === type).map(r => ({
+          beskrivelse: r.beskrivelse,
+          matcher_felt: r.matcher_felt,
+          matcher_operator: r.matcher_operator,
+          matcher_vaerdi: r.matcher_vaerdi,
+          varer: (r.auto_regel_varer || []).map(v => ({ varenr: v.varenr, antal: parseFloat(v.antal) }))
+        }));
+        AUTO_REGLER_SIGNAL.length = 0;
+        AUTO_REGLER_UDSTYR.length = 0;
+        AUTO_REGLER_MAST.length = 0;
+        bygRegler('signal').forEach(r => AUTO_REGLER_SIGNAL.push(r));
+        bygRegler('udstyr').forEach(r => AUTO_REGLER_UDSTYR.push(r));
+        bygRegler('mast').forEach(r => AUTO_REGLER_MAST.push(r));
+        console.log('Auto-regler OK — S:', AUTO_REGLER_SIGNAL.length, 'U:', AUTO_REGLER_UDSTYR.length, 'M:', AUTO_REGLER_MAST.length);
+      }
 
       const el = document.getElementById('status-besked');
       if (el) el.style.display = 'none';
@@ -786,156 +802,30 @@
   // ==============================
   // Automatiske regler
   // ==============================
-  const AUTO_REGLER_SIGNAL = [
-    {
-      beskrivelse: 'DSI signal → 1× Konsol opadvendt DSI',
-      matcher: sig => sig.kategori && sig.kategori.includes('DSI') && !(sig.kategori === 'Sunburst DSI' && sig.type && sig.type.includes('4-lys')),
-      varer: [{ varenr: '270-500-3002', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Ercolight 2 punkt 3-felt/2-felt → 2× Støtteholder sort kort',
-      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && !sig.type.includes('1-felt'),
-      varer: [{ varenr: '167-650-0211', antal: 2 }]
-    },
-    {
-      beskrivelse: 'Ercolight 2 punkt 3-felt/2-felt → 2× Flangemøtrik',
-      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && !sig.type.includes('1-felt'),
-      varer: [{ varenr: '270-100-8268', antal: 2 }]
-    },
-    {
-      beskrivelse: 'Ercolight 2 punkt 3-felt/2-felt → 2× Pindbolt',
-      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && !sig.type.includes('1-felt'),
-      varer: [{ varenr: '270-100-1056', antal: 2 }]
-    },
-    {
-      beskrivelse: 'Ercolight 2 punkt 1-felt → 1× Støtteholder sort lang',
-      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && sig.type.includes('1-felt'),
-      varer: [{ varenr: '167-650-0212', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Ercolight 2 punkt 1-felt → 1× Flangemøtrik',
-      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && sig.type.includes('1-felt'),
-      varer: [{ varenr: '270-100-8268', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Ercolight 2 punkt 1-felt → 1× Pindbolt',
-      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && sig.type.includes('1-felt'),
-      varer: [{ varenr: '270-100-1056', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Ercolight 2 punkt 1-felt → 3,5m Lanternekabel 5G1mm Sort',
-      matcher: sig => sig.kategori && sig.kategori.includes('2 punkt') && sig.type && sig.type.includes('1-felt'),
-      varer: [{ varenr: '250-100-0362', antal: 3.5 }]
-    },
-    {
-      beskrivelse: 'Lavt signal (ikke 1-felt) → 3,5m Lanternekabel 5G1mm Sort',
-      matcher: sig => sig.hojde === 'Lavt' && !(sig.kategori && sig.kategori.includes('2 punkt') && sig.type && sig.type.includes('1-felt')),
-      varer: [{ varenr: '250-100-0362', antal: 3.5 }]
-    },
-    {
-      beskrivelse: 'Højt signal → 5m Lanternekabel 5G1mm Sort',
-      matcher: sig => sig.hojde === 'Højt',
-      varer: [{ varenr: '250-100-0362', antal: 5 }]
-    },
-    {
-      beskrivelse: 'Lanterne 4-felt polsk pissignal → 2m Lanternekabel 7G1mm Sort',
-      matcher: sig => sig.varenr === '167-250-0501',
-      varer: [{ varenr: '250-100-0365', antal: 2 }]
-    },
-    {
-      beskrivelse: 'Ercolight 1-felt (2 punkt + DSI) → 1× Pil maske grøn',
-      matcher: sig => sig.type && sig.type.includes('1-felt') && sig.kategori && sig.kategori.includes('Ercolight'),
-      varer: [{ varenr: '167-650-0674', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Signal med pilemaske → 2× Rød/gul + 1× Grøn',
-      matcher: sig => sig.pilemaske === true,
-      varer: [
-        { varenr: '167-650-0673', antal: 2 },
-        { varenr: '167-650-0674', antal: 1 },
-      ]
-    },
-  ];
-
-  const AUTO_REGLER_UDSTYR = [
-    {
-      beskrivelse: 'Flir TrafiOne → 8m Kabel Kat 6A',
-      matcher: u => u.varenr === '250-650-0118' || u.varenr === '250-650-0119',
-      varer: [{ varenr: '250-100-1997', antal: 8 }]
-    },
-    {
-      beskrivelse: 'Smartmicro Type 44/45/48 → Kabel UMMR',
-      matcher: u => ['250-650-0164', '250-650-0165', '250-650-0167'].includes(u.varenr),
-      varer: [{ varenr: '250-650-0159', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Smartmicro Type 44/45 → Konsol UMMR 29/44/45',
-      matcher: u => ['250-650-0164', '250-650-0165'].includes(u.varenr),
-      varer: [{ varenr: '250-650-0137', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Smartmicro Type 29/30 → Kabel til radar 10 meter',
-      matcher: u => ['250-650-0160', '250-650-0161'].includes(u.varenr),
-      varer: [{ varenr: '250-650-0141', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Smartmicro Type 29/30 → Konsol UMMR 29/44/45',
-      matcher: u => ['250-650-0160', '250-650-0161'].includes(u.varenr),
-      varer: [{ varenr: '250-650-0137', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Smartmicro Type 48 → Konsol UMMR 42/48',
-      matcher: u => u.varenr === '250-650-0167',
-      varer: [{ varenr: '250-650-0162', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Heimdall radar → 4m Lanternekabel 5G1mm',
-      matcher: u => u.varenr === '167-665-0063' || u.varenr === '167-665-0065',
-      varer: [{ varenr: '250-100-0362', antal: 4 }]
-    },
-    {
-      beskrivelse: 'Vægbeslag DSI → 1× Ophæng Universal DSI',
-      matcher: u => u.varenr === '270-500-3009',
-      varer: [{ varenr: '270-500-3008', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Ophæng Universal DSI → 1× Vægbeslag DSI',
-      matcher: u => u.varenr === '270-500-3008',
-      varer: [{ varenr: '270-500-3009', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Prisma fodgængertryk med klistermærke → Mærkat Tryk for Grønt',
-      matcher: u => u.klistermaerke && u.underkategori === 'Prisma',
-      varer: [{ varenr: '250-650-0050', antal: 1 }]
-    },
-    {
-      beskrivelse: 'RTB fodgængertryk med klistermærke → Makat til fodgængertryk RTB',
-      matcher: u => u.klistermaerke && u.underkategori === 'RTB',
-      varer: [{ varenr: '250-550-0051', antal: 1 }]
-    },
-    {
-      beskrivelse: 'Klemrække → 1× Sejldugspose',
-      matcher: u => ['250-300-1001','250-300-1002','250-300-1003','250-300-1004','250-300-1005','250-300-1007','250-300-1008','250-300-1009'].includes(u.varenr),
-      varer: [{ varenr: '250-300-1100', antal: 1 }]
-    },
-  ];
-
-  // Auto-regler baseret på mastetype
-  const AUTO_REGLER_MAST = [
-    { matcher: m => m.mastetype === 'Lav DSI mast',       varer: [{ varenr: '270-500-3005', antal: 1 }] },
-    { matcher: m => m.mastetype === 'Høj DSI mast',       varer: [{ varenr: '270-500-3005', antal: 1 }, { varenr: '270-500-3006', antal: 1 }] },
-    { matcher: m => m.mastetype === 'DSI Galgemast cykel', varer: [{ varenr: '270-500-3006', antal: 1 }] },
-    { matcher: m => m.mastetype === 'DSI Galgemast høj',   varer: [{ varenr: '270-500-3006', antal: 1 }] },
-  ];
-
-  // Bagudkompatibilitet
+  // Auto-regler — indlæses fra Supabase
+  let AUTO_REGLER_SIGNAL = [];
+  let AUTO_REGLER_UDSTYR = [];
+  let AUTO_REGLER_MAST = [];
   const AUTO_REGLER = AUTO_REGLER_SIGNAL;
+
+
+  function matcherPasser(regel, obj) {
+    const felt = regel.matcher_felt;
+    const op = regel.matcher_operator;
+    const vaerdi = regel.matcher_vaerdi;
+    const val = obj[felt];
+    if (op === 'equals') return String(val) === vaerdi;
+    if (op === 'includes') return val && String(val).includes(vaerdi);
+    if (op === 'in_list') return vaerdi.split(',').includes(String(val));
+    if (felt === 'underkategori_og_klisterm') return obj.klistermaerke && obj.underkategori === vaerdi;
+    return false;
+  }
 
   // Beregn automatiske varer for et enkelt signal
   function autoVarerForSignal(sig) {
     const result = [];
     AUTO_REGLER_SIGNAL.forEach(regel => {
-      if (regel.matcher(sig)) regel.varer.forEach(v => result.push({ ...v }));
+      if (matcherPasser(regel, sig)) regel.varer.forEach(v => result.push({ ...v }));
     });
     return result;
   }
@@ -944,17 +834,15 @@
   function autoVarerForUdstyr(u, mastetype) {
     const result = [];
     AUTO_REGLER_UDSTYR.forEach(regel => {
-      if (regel.matcher(u)) regel.varer.forEach(v => result.push({ ...v }));
+      if (matcherPasser(regel, u)) regel.varer.forEach(v => result.push({ ...v }));
     });
 
     // Spændbånd baseret på radar/kamera + mastetype
     if (RADAR_VARENUMRE.includes(u.varenr)) {
       if (u.forlængerArm) {
-        // På forlænger arm
         const svarenr = FLIR_VARENUMRE.includes(u.varenr) ? SPAENDBAAND_ARM_FLIR : SPAENDBAAND_ARM_DEFAULT;
         result.push({ varenr: svarenr, antal: 2 });
       } else if (mastetype) {
-        // Direkte på mast
         const svarenr = SPAENDBAAND_PR_MAST[mastetype];
         if (svarenr) result.push({ varenr: svarenr, antal: 2 });
       }
@@ -1054,7 +942,7 @@
   function autoVarerForMast(mast) {
     const result = [];
     AUTO_REGLER_MAST.forEach(regel => {
-      if (regel.matcher(mast)) regel.varer.forEach(v => result.push({ ...v }));
+      if (matcherPasser(regel, mast)) regel.varer.forEach(v => result.push({ ...v }));
     });
     return result;
   }
