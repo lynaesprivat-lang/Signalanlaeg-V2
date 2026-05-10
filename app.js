@@ -125,6 +125,9 @@
           matcher_felt: r.matcher_felt,
           matcher_operator: r.matcher_operator,
           matcher_vaerdi: r.matcher_vaerdi,
+          matcher_felt2: r.matcher_felt2 || '',
+          matcher_operator2: r.matcher_operator2 || '',
+          matcher_vaerdi2: r.matcher_vaerdi2 || '',
           varer: (r.auto_regel_varer || []).map(v => ({ varenr: v.varenr, antal: parseFloat(v.antal) }))
         }));
         AUTO_REGLER_SIGNAL.length = 0;
@@ -809,16 +812,24 @@
   const AUTO_REGLER = AUTO_REGLER_SIGNAL;
 
 
-  function matcherPasser(regel, obj) {
-    const felt = regel.matcher_felt;
-    const op = regel.matcher_operator;
-    const vaerdi = regel.matcher_vaerdi;
+  function matcherEt(felt, op, vaerdi, obj) {
+    if (!felt || !op || !vaerdi) return true; // tom betingelse = altid sand
     const val = obj[felt];
     if (op === 'equals') return String(val) === vaerdi;
     if (op === 'includes') return val && String(val).includes(vaerdi);
+    if (op === 'not_includes') return !val || !String(val).includes(vaerdi);
     if (op === 'in_list') return vaerdi.split(',').includes(String(val));
     if (felt === 'underkategori_og_klisterm') return obj.klistermaerke && obj.underkategori === vaerdi;
     return false;
+  }
+
+  function matcherPasser(regel, obj) {
+    const første = matcherEt(regel.matcher_felt, regel.matcher_operator, regel.matcher_vaerdi, obj);
+    if (!første) return false;
+    if (regel.matcher_felt2 && regel.matcher_operator2 && regel.matcher_vaerdi2) {
+      return matcherEt(regel.matcher_felt2, regel.matcher_operator2, regel.matcher_vaerdi2, obj);
+    }
+    return true;
   }
 
   // Beregn automatiske varer for et enkelt signal
