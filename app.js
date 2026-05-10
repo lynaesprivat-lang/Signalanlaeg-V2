@@ -1568,6 +1568,8 @@
       if (hojde) sig.hojde = hojde.value;
       if (note) sig.note = note.value.trim();
       if (pilemaskeEl !== null) sig.pilemaske = pilemaskeEl ? pilemaskeEl.checked : false;
+      // Nulstil auto-overrides så auto-varer genberegnes
+      delete sig._autoOverrides;
       delete sig._redigerer;
       render();
     } else if (action === 'rediger-udstyr') {
