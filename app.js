@@ -1348,6 +1348,7 @@
     $('gem-btn').addEventListener('click', gemAnlaeg);
     $('indlaes-btn').addEventListener('click', () => indlaesAnlaeg($('gemte-anlaeg').value));
     $('omdoeb-btn').addEventListener('click', () => omdoebAnlaeg($('gemte-anlaeg').value));
+    $('slet-btn') && $('slet-btn').addEventListener('click', () => sletAnlaeg($('gemte-anlaeg').value));
 
     $('gem-alle-supabase-btn') && $('gem-alle-supabase-btn').addEventListener('click', gemAlleSupabase);
     $('export-json-btn').addEventListener('click', eksporterJson);
