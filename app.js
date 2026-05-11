@@ -17,8 +17,8 @@
   let SIGNAL_TYPER = [];
 
   const HOJDE_MULIGHEDER = ['', 'Højt', 'Lavt'];
-  const FLIR_VARENUMRE = ['250-650-0118', '250-650-0119'];
-  const RADAR_VARENUMRE = [
+  let FLIR_VARENUMRE = ['250-650-0118', '250-650-0119'];
+  let RADAR_VARENUMRE = [
     '250-650-0160', '250-650-0161', '250-650-0164', '250-650-0165', '250-650-0167',
     '250-650-0118', '250-650-0119',
     '167-665-0063', '167-665-0065',
@@ -113,6 +113,11 @@
         UDSTYR_TYPER = UDSTYR_MENU.flatMap(k => k.underkategorier
           ? k.underkategorier.flatMap(u => u.varer.map(v => v.beskrivelse))
           : (k.varer || []).map(v => v.beskrivelse));
+        // Byg RADAR og FLIR lister fra databasen
+        RADAR_VARENUMRE.length = 0;
+        FLIR_VARENUMRE.length = 0;
+        (varerData || []).filter(v => v.er_radar).forEach(v => RADAR_VARENUMRE.push(v.varenr));
+        (varerData || []).filter(v => v.er_flir).forEach(v => FLIR_VARENUMRE.push(v.varenr));
       }
 
       SIGNAL_TYPER = SIGNAL_KATEGORIER.flatMap(k => k.typer.map(t => t.label));
@@ -848,7 +853,7 @@
       if (matcherPasser(regel, u)) regel.varer.forEach(v => result.push({ ...v }));
     });
 
-    // Spændbånd baseret på radar/kamera + mastetype
+    // Spændbånd for radar/kamera — slås op fra maste_typer via SPAENDBAAND_PR_MAST
     if (RADAR_VARENUMRE.includes(u.varenr)) {
       if (u.forlængerArm) {
         const svarenr = FLIR_VARENUMRE.includes(u.varenr) ? SPAENDBAAND_ARM_FLIR : SPAENDBAAND_ARM_DEFAULT;
@@ -1344,6 +1349,7 @@
     $('indlaes-btn').addEventListener('click', () => indlaesAnlaeg($('gemte-anlaeg').value));
     $('omdoeb-btn').addEventListener('click', () => omdoebAnlaeg($('gemte-anlaeg').value));
 
+    $('gem-alle-supabase-btn') && $('gem-alle-supabase-btn').addEventListener('click', gemAlleSupabase);
     $('export-json-btn').addEventListener('click', eksporterJson);
     $('export-json-enkelt-btn') && $('export-json-enkelt-btn').addEventListener('click', eksporterJsonEnkelt);
     $('import-json-input').addEventListener('change', e => {
@@ -1929,6 +1935,21 @@
       if (omdoebContainer) omdoebContainer.style.display = 'none';
     }
     return true;
+  }
+
+  async function gemAlleSupabase() {
+    const noegler = gemteNoegler();
+    if (noegler.length === 0) { visBesked('Ingen lokale anlæg at gemme', 'danger'); return; }
+    visBesked(`Gemmer ${noegler.length} anlæg til sky...`);
+    let ok = 0;
+    for (const key of noegler) {
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
+        await supabaseGemAnlaeg(key, data);
+        ok++;
+      } catch (e) { console.warn('Fejl ved gem af', key, e); }
+    }
+    visBesked(`✓ ${ok} af ${noegler.length} anlæg gemt til sky`);
   }
 
   async function supabaseGemAnlaeg(key, data) {
