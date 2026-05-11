@@ -1980,6 +1980,9 @@
   async function supabaseHentAlle() {
     const { data, error } = await sb.from('anlaeg').select('nr, navn, data').order('nr');
     if (error || !data) return;
+    // Ryd gamle lokale anlæg så Supabase altid vinder
+    gemteNoegler().forEach(key => localStorage.removeItem(key));
+    // Gem alle fra Supabase lokalt
     data.forEach(row => {
       const key = STORAGE_PREFIX + row.nr;
       localStorage.setItem(key, JSON.stringify(row.data));
