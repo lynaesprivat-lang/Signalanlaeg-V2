@@ -1240,15 +1240,28 @@
     if (!key) return;
     const nytNavn = $('omdoeb-input').value.trim();
     if (!nytNavn) return;
+    const gammeltNavn = key.replace(STORAGE_PREFIX, '');
     const nyKey = STORAGE_PREFIX + nytNavn.replace(/[^a-zA-Z0-9æøåÆØÅ_-]/g, '_');
-    const data = localStorage.getItem(key);
-    if (!data) return;
-    localStorage.setItem(nyKey, data);
+    const rawData = localStorage.getItem(key);
+    if (!rawData) return;
+    // Opdater nr i data
+    const data = JSON.parse(rawData);
+    data.nr = nytNavn;
+    localStorage.setItem(nyKey, JSON.stringify(data));
     localStorage.removeItem(key);
+    // Opdater state hvis dette anlæg er det aktive
+    if (state.nr === gammeltNavn) {
+      state.nr = nytNavn;
+      opdaterFormFelter();
+      opdaterOutput();
+    }
     $('omdoeb-container').style.display = 'none';
     opdaterGemtListe();
     $('gemte-anlaeg').value = nyKey;
     visBesked(`✓ Omdøbt til ${nytNavn}`);
+    // Slet gammelt fra Supabase og gem nyt
+    supabaseSletAnlaeg(gammeltNavn).catch(() => {});
+    supabaseGemAnlaeg(nyKey, data).catch(() => {});
   }
 
   function eksporterJson() {
