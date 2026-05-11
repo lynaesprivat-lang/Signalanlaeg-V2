@@ -1709,6 +1709,17 @@
           .map(v => `<option value="${escapeHtml(v.varenr)}">${escapeHtml(visNavn(v))}</option>`)
           .join('');
       }
+    } else if (t.dataset.field === 'udstyrtype') {
+      const card = t.closest('.mast-card');
+      const mIdx = parseInt(t.dataset.mast);
+      const armWrap = card.querySelector(`#udstyr-arm-wrap-${mIdx}`);
+      const meterWrap = card.querySelector(`#udstyr-meter-wrap-${mIdx}`);
+      const antalWrap = card.querySelector(`#udstyr-antal-wrap-${mIdx}`);
+      const erRadar = RADAR_VARENUMRE.includes(t.value);
+      const erKabel = KABEL_VARENUMRE.includes(t.value);
+      if (armWrap) armWrap.style.display = erRadar ? '' : 'none';
+      if (meterWrap) meterWrap.style.display = erKabel ? '' : 'none';
+      if (antalWrap) antalWrap.style.display = erKabel ? 'none' : '';
     } else if (t.dataset.field === 'udstyrkategori') {
       const card = t.closest('.mast-card');
       const mIdx = parseInt(t.dataset.mast);
@@ -1738,8 +1749,8 @@
         const meterWrap = card.querySelector(`#udstyr-meter-wrap-${mIdx}`);
         const antalWrap = card.querySelector(`#udstyr-antal-wrap-${mIdx}`);
         const armWrap = card.querySelector(`#udstyr-arm-wrap-${mIdx}`);
-        const erKabel = kat.varer.length > 0 && KABEL_VARENUMRE.includes(kat.varer[0].varenr);
-        const erRadar = kat.varer.length > 0 && RADAR_VARENUMRE.includes(kat.varer[0].varenr);
+        const erKabel = kat.varer.some(v => KABEL_VARENUMRE.includes(v.varenr));
+        const erRadar = kat.varer.some(v => RADAR_VARENUMRE.includes(v.varenr));
         if (meterWrap) meterWrap.style.display = erKabel ? '' : 'none';
         if (antalWrap) antalWrap.style.display = erKabel ? 'none' : '';
         if (armWrap) armWrap.style.display = erRadar ? '' : 'none';
@@ -1767,7 +1778,7 @@
         const armWrap2 = card.querySelector(`#udstyr-arm-wrap-${mIdx2}`);
         const klistermWrap2 = card.querySelector(`#udstyr-klisterm-wrap-${mIdx2}`);
         const erKabel2 = under.varer.length > 0 && KABEL_VARENUMRE.includes(under.varer[0].varenr);
-        const erRadar2 = under.varer.length > 0 && RADAR_VARENUMRE.includes(under.varer[0].varenr);
+        const erRadar2 = under.varer.some(v => RADAR_VARENUMRE.includes(v.varenr));
         const erFodgTryk = valgtUnder === 'Prisma' || valgtUnder === 'RTB';
         if (meterWrap2) meterWrap2.style.display = erKabel2 ? '' : 'none';
         if (antalWrap2) antalWrap2.style.display = erKabel2 ? 'none' : '';
