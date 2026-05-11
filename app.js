@@ -2063,4 +2063,6 @@
     init();
   }
 
+  window.bekraeftOmdoeb = bekraeftOmdoeb;
+
 })();
