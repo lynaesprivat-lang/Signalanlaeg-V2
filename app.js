@@ -136,6 +136,9 @@
           matcher_felt3: r.matcher_felt3 || '',
           matcher_operator3: r.matcher_operator3 || '',
           matcher_vaerdi3: r.matcher_vaerdi3 || '',
+          matcher_felt4: r.matcher_felt4 || '',
+          matcher_operator4: r.matcher_operator4 || '',
+          matcher_vaerdi4: r.matcher_vaerdi4 || '',
           varer: (r.auto_regel_varer || []).map(v => ({ varenr: v.varenr, antal: parseFloat(v.antal) }))
         }));
         AUTO_REGLER_SIGNAL.length = 0;
@@ -839,6 +842,9 @@
     }
     if (regel.matcher_felt3 && regel.matcher_operator3 && regel.matcher_vaerdi3) {
       if (!matcherEt(regel.matcher_felt3, regel.matcher_operator3, regel.matcher_vaerdi3, obj)) return false;
+    }
+    if (regel.matcher_felt4 && regel.matcher_operator4 && regel.matcher_vaerdi4) {
+      if (!matcherEt(regel.matcher_felt4, regel.matcher_operator4, regel.matcher_vaerdi4, obj)) return false;
     }
     return true;
   }
