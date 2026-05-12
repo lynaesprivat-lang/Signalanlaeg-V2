@@ -825,12 +825,12 @@
 
   function matcherEt(felt, op, vaerdi, obj) {
     if (!felt || !op || !vaerdi) return true; // tom betingelse = altid sand
+    if (felt === 'underkategori_og_klisterm') return obj.klistermaerke && obj.underkategori === vaerdi;
     const val = obj[felt];
     if (op === 'equals') return String(val) === vaerdi;
     if (op === 'includes') return val && String(val).includes(vaerdi);
     if (op === 'not_includes') return !val || !String(val).includes(vaerdi);
     if (op === 'in_list') return vaerdi.split(',').includes(String(val));
-    if (felt === 'underkategori_og_klisterm') return obj.klistermaerke && obj.underkategori === vaerdi;
     return false;
   }
 
