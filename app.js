@@ -133,6 +133,9 @@
           matcher_felt2: r.matcher_felt2 || '',
           matcher_operator2: r.matcher_operator2 || '',
           matcher_vaerdi2: r.matcher_vaerdi2 || '',
+          matcher_felt3: r.matcher_felt3 || '',
+          matcher_operator3: r.matcher_operator3 || '',
+          matcher_vaerdi3: r.matcher_vaerdi3 || '',
           varer: (r.auto_regel_varer || []).map(v => ({ varenr: v.varenr, antal: parseFloat(v.antal) }))
         }));
         AUTO_REGLER_SIGNAL.length = 0;
@@ -832,7 +835,10 @@
     const første = matcherEt(regel.matcher_felt, regel.matcher_operator, regel.matcher_vaerdi, obj);
     if (!første) return false;
     if (regel.matcher_felt2 && regel.matcher_operator2 && regel.matcher_vaerdi2) {
-      return matcherEt(regel.matcher_felt2, regel.matcher_operator2, regel.matcher_vaerdi2, obj);
+      if (!matcherEt(regel.matcher_felt2, regel.matcher_operator2, regel.matcher_vaerdi2, obj)) return false;
+    }
+    if (regel.matcher_felt3 && regel.matcher_operator3 && regel.matcher_vaerdi3) {
+      if (!matcherEt(regel.matcher_felt3, regel.matcher_operator3, regel.matcher_vaerdi3, obj)) return false;
     }
     return true;
   }
